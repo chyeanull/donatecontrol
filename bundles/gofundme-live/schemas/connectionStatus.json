@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "connecting",
+        "connected",
+        "error"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "mock",
+        "gofundme-pro",
+        "donordrive",
+        "givebutter"
+      ]
+    },
+    "message": {
+      "type": "string"
+    },
+    "lastSuccessfulFetch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "nextRetryAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "state",
+    "provider",
+    "message",
+    "lastSuccessfulFetch",
+    "nextRetryAt"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "state": "disconnected",
+    "provider": "mock",
+    "message": "Ready when you are. Connect a campaign to begin.",
+    "lastSuccessfulFetch": null,
+    "nextRetryAt": null
+  }
+}

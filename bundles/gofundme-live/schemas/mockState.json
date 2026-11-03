@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "campaign": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "raised": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "goal": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000000000000
+        },
+        "percent": {
+          "type": "number",
+          "minimum": 0
+        },
+        "donationCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "lastUpdated": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "connected": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "title",
+        "currency",
+        "raised",
+        "goal",
+        "percent",
+        "lastUpdated",
+        "connected"
+      ],
+      "additionalProperties": false
+    },
+    "donations": {
+      "maxItems": 1000,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "donorName": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "anonymous": {
+            "type": "boolean"
+          },
+          "test": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "id",
+          "donorName",
+          "amount",
+          "currency",
+          "timestamp",
+          "anonymous"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "campaign",
+    "donations"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "campaign": {
+      "id": "demo",
+      "url": "",
+      "title": "Charity Stream",
+      "currency": "USD",
+      "raised": 12500,
+      "goal": 25000,
+      "percent": 50,
+      "lastUpdated": null,
+      "connected": false,
+      "donationCount": 128
+    },
+    "donations": []
+  }
+}

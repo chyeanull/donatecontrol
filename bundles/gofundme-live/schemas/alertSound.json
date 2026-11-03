@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "file": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9-]{36}\\.(mp3|wav|ogg)$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "volume": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "required": [
+    "file",
+    "name",
+    "enabled",
+    "volume"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "file": null,
+    "name": "",
+    "enabled": false,
+    "volume": 0.7
+  }
+}

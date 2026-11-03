@@ -1,0 +1,153 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "string",
+      "enum": [
+        "classic",
+        "quest",
+        "bwf"
+      ]
+    },
+    "animation": {
+      "type": "string",
+      "enum": [
+        "draw-left",
+        "rise-fade",
+        "soft-zoom"
+      ]
+    },
+    "alertAnimation": {
+      "type": "string",
+      "enum": [
+        "draw-left",
+        "rise-fade",
+        "soft-zoom"
+      ]
+    },
+    "thermometerAnimation": {
+      "type": "string",
+      "enum": [
+        "draw-left",
+        "rise-fade",
+        "soft-zoom"
+      ]
+    },
+    "classicColors": {
+      "type": "object",
+      "properties": {
+        "font": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        }
+      },
+      "required": [
+        "font",
+        "accent",
+        "background"
+      ],
+      "additionalProperties": false
+    },
+    "customTheme": {
+      "type": "object",
+      "properties": {
+        "borderWidth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "corners": {
+          "type": "string",
+          "enum": [
+            "rounded",
+            "straight"
+          ]
+        },
+        "iconEnabled": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string",
+          "enum": [
+            "heart",
+            "smile",
+            "gift",
+            "praying-hands",
+            "hand-heart",
+            "handshake",
+            "star",
+            "ribbon",
+            "coin",
+            "sprout"
+          ]
+        },
+        "fontFamily": {
+          "type": "string",
+          "enum": [
+            "Roboto",
+            "Open Sans",
+            "Google Sans",
+            "Inter",
+            "Montserrat",
+            "Poppins",
+            "Lato",
+            "Noto Sans JP",
+            "Arimo",
+            "Roboto Condensed",
+            "Noto Sans",
+            "Roboto Mono",
+            "Oswald",
+            "DM Sans",
+            "Raleway",
+            "Nunito",
+            "Nunito Sans",
+            "Playfair Display",
+            "Roboto Slab",
+            "Ubuntu"
+          ]
+        }
+      },
+      "required": [
+        "borderWidth",
+        "corners",
+        "iconEnabled",
+        "icon"
+      ],
+      "additionalProperties": false
+    },
+    "animationInMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "animationOutMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000
+    }
+  },
+  "required": [
+    "theme"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "theme": "classic",
+    "animation": "draw-left",
+    "animationInMs": 500,
+    "animationOutMs": 400,
+    "classicColors": {
+      "font": "#f8faf5",
+      "accent": "#b5f36d",
+      "background": "#141a19"
+    }
+  }
+}

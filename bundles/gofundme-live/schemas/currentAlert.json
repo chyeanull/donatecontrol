@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "donation": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "donorName": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000000000000
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "timestamp": {
+              "type": "string"
+            },
+            "anonymous": {
+              "type": "boolean"
+            },
+            "test": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string",
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "id",
+            "donorName",
+            "amount",
+            "currency",
+            "timestamp",
+            "anonymous"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "visible": {
+      "type": "boolean"
+    },
+    "queued": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "entryId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "queuedEntryIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "playback": {
+      "type": "object",
+      "properties": {
+        "animation": {
+          "type": "string",
+          "enum": [
+            "draw-left",
+            "rise-fade",
+            "soft-zoom"
+          ]
+        },
+        "animationInMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "animationOutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        }
+      },
+      "required": [
+        "animation",
+        "animationInMs",
+        "animationOutMs"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "donation",
+    "visible",
+    "queued"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "donation": null,
+    "visible": false,
+    "queued": 0,
+    "entryId": null,
+    "queuedEntryIds": []
+  }
+}

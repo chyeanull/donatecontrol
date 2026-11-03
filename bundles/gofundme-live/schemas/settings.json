@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "provider": {
+      "type": "string",
+      "enum": [
+        "mock",
+        "gofundme-pro",
+        "donordrive",
+        "givebutter"
+      ]
+    },
+    "campaignUrl": {
+      "type": "string",
+      "maxLength": 2048
+    },
+    "campaignId": {
+      "default": "",
+      "type": "string",
+      "maxLength": 40
+    },
+    "donorDriveResource": {
+      "default": "participants",
+      "type": "string",
+      "enum": [
+        "participants",
+        "teams",
+        "events"
+      ]
+    },
+    "pollingIntervalSeconds": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 300
+    },
+    "alertsEnabled": {
+      "default": true,
+      "type": "boolean"
+    },
+    "alertDurationSeconds": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 30
+    }
+  },
+  "required": [
+    "provider",
+    "campaignUrl",
+    "campaignId",
+    "pollingIntervalSeconds",
+    "alertsEnabled",
+    "alertDurationSeconds"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "provider": "mock",
+    "campaignUrl": "",
+    "campaignId": "",
+    "donorDriveResource": "participants",
+    "pollingIntervalSeconds": 15,
+    "alertsEnabled": true,
+    "alertDurationSeconds": 6
+  }
+}

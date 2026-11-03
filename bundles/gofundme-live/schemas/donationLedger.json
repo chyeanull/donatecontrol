@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "campaignKey": {
+      "type": "string"
+    },
+    "seenIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cutoff": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "campaignKey",
+    "seenIds",
+    "cutoff"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "campaignKey": "",
+    "seenIds": [],
+    "cutoff": null
+  }
+}

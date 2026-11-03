@@ -1,0 +1,46 @@
+{
+  "name": "gofundme-live",
+  "version": "1.0.0",
+  "private": true,
+  "nodecg": {
+    "compatibleRange": "^2.8.0",
+    "dashboardPanels": [
+      {
+        "name": "control",
+        "title": "01 · Main",
+        "file": "control.html",
+        "fullbleed": true
+      },
+      {
+        "name": "overlays",
+        "title": "02 · Your overlays",
+        "file": "overlays.html",
+        "fullbleed": true
+      },
+      {
+        "name": "alerts",
+        "title": "03 · Alert Settings",
+        "file": "alerts.html",
+        "fullbleed": true
+      },
+      {
+        "name": "donations",
+        "title": "04 · Donation List & Alerts",
+        "file": "donations.html",
+        "fullbleed": true
+      }
+    ],
+    "graphics": [
+      {
+        "file": "thermometer.html",
+        "width": 1000,
+        "height": 180
+      },
+      {
+        "file": "alert.html",
+        "width": 1000,
+        "height": 250
+      }
+    ]
+  }
+}

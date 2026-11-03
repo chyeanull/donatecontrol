@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "manual": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "manual"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "manual": false
+  }
+}

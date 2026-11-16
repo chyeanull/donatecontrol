@@ -7,7 +7,9 @@
       "enum": [
         "classic",
         "quest",
-        "bwf"
+        "bwf",
+        "cyberpunk",
+        "gta6"
       ]
     },
     "animation": {
@@ -15,7 +17,9 @@
       "enum": [
         "draw-left",
         "rise-fade",
-        "soft-zoom"
+        "soft-zoom",
+        "slide-right",
+        "center-reveal"
       ]
     },
     "alertAnimation": {
@@ -23,7 +27,9 @@
       "enum": [
         "draw-left",
         "rise-fade",
-        "soft-zoom"
+        "soft-zoom",
+        "slide-right",
+        "center-reveal"
       ]
     },
     "thermometerAnimation": {
@@ -31,7 +37,9 @@
       "enum": [
         "draw-left",
         "rise-fade",
-        "soft-zoom"
+        "soft-zoom",
+        "slide-right",
+        "center-reveal"
       ]
     },
     "classicColors": {

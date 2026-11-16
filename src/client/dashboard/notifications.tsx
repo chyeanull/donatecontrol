@@ -10,6 +10,7 @@ export const notify = {
 };
 
 const confirmations: Record<keyof Commands, string> = {
+  setMovemberGoal: 'Fundraising goal updated.',
   connect: 'Campaign connected.', refresh: 'Campaign refreshed.', disconnect: 'Campaign disconnected.',
   saveSettings: 'Broadcast settings saved.', testAlert: 'Test alert queued.', clearQueue: 'Playback queue cleared.',
   dismissAlert: 'Current alert dismissed.', resendDonation: 'Donation alert queued again.', sendDonation: 'Donation alert queued for screen.',

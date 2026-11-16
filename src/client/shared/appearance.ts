@@ -1,5 +1,13 @@
 import type { CSSProperties } from 'react';
 import { DEFAULT_ANIMATION_IN_MS, DEFAULT_ANIMATION_OUT_MS, defaultClassicColors, defaultCustomTheme, type ClassicColors, type CustomTheme, type OverlayTheme } from '../../shared/models';
+import type { GraphicFont } from '../../shared/fonts';
+
+export function overlayGoogleFont(theme: OverlayTheme, custom?: CustomTheme): GraphicFont | undefined {
+  if (theme === 'classic') return custom?.fontFamily ?? 'Inter';
+  if (theme === 'cyberpunk') return 'Rajdhani';
+  if (theme === 'gta6') return 'Oswald';
+  return undefined;
+}
 
 export function overlayMotionStyle(animationInMs = DEFAULT_ANIMATION_IN_MS, animationOutMs = DEFAULT_ANIMATION_OUT_MS): CSSProperties {
   return { '--overlay-in-duration': `${animationInMs}ms`, '--overlay-out-duration': `${animationOutMs}ms` } as CSSProperties;
@@ -15,7 +23,7 @@ export function customThemeStyle(theme: OverlayTheme, colors: ClassicColors = de
     '--graphic-accent': colors.accent,
     '--graphic-surface': colors.background,
     '--graphic-muted': `color-mix(in srgb, ${colors.font} 68%, ${colors.background})`,
-    '--graphic-border': `color-mix(in srgb, ${colors.accent} 40%, ${colors.background})`,
+    '--graphic-border': colors.accent,
     '--graphic-track': `color-mix(in srgb, ${colors.accent} 16%, ${colors.background})`,
     '--graphic-tint': `${colors.accent}16`,
     '--graphic-border-width': `${custom.borderWidth}px`,

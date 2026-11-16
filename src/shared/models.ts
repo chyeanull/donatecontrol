@@ -6,7 +6,7 @@ export const DEFAULT_ANIMATION_IN_MS = 500;
 export const DEFAULT_ANIMATION_OUT_MS = 400;
 export const MAX_ANIMATION_MS = 10000;
 export const animationMsSchema = z.number().int().min(0).max(MAX_ANIMATION_MS);
-export const overlayAnimationSchema = z.enum(['draw-left', 'rise-fade', 'soft-zoom']);
+export const overlayAnimationSchema = z.enum(['draw-left', 'rise-fade', 'soft-zoom', 'slide-right', 'center-reveal']);
 export type OverlayAnimation = z.infer<typeof overlayAnimationSchema>;
 export const alertPlaybackSchema = z.object({ animation: overlayAnimationSchema, animationInMs: animationMsSchema, animationOutMs: animationMsSchema });
 export type AlertPlayback = z.infer<typeof alertPlaybackSchema>;
@@ -14,12 +14,13 @@ export const defaultAlertPlayback: AlertPlayback = { animation: 'draw-left', ani
 const money = z.number().finite().min(0).max(1e12);
 const currency = z.string().regex(/^[A-Z]{3}$/);
 const date = z.string().nullable();
-export const providerSchema = z.enum(['mock', 'gofundme-pro', 'donordrive', 'givebutter']);
-export const providerNames = { mock: 'Mock / Demo', 'gofundme-pro': 'GoFundMe Pro', donordrive: 'DonorDrive', givebutter: 'Givebutter' } as const;
+export const providerSchema = z.enum(['mock', 'gofundme-pro', 'donordrive', 'givebutter', 'movember']);
+export const providerNames = { mock: 'Mock / Demo', 'gofundme-pro': 'GoFundMe Pro', donordrive: 'DonorDrive', givebutter: 'Givebutter', movember: 'Movember' } as const;
 export const donorDriveResourceSchema = z.enum(['participants', 'teams', 'events']);
 export const campaignSchema = z.object({
   id: z.string().nullable(), url: z.string(), title: z.string(), currency,
   raised: money, goal: money, percent: z.number().finite().min(0),
+  goalOverridden: z.boolean().optional(),
   donationCount: z.number().int().nonnegative().optional(),
   lastUpdated: date, connected: z.boolean(),
 });
@@ -41,6 +42,10 @@ export const campaignConnectionSchema = settingsSchema.pick({ provider: true, ca
   key: z.string(), title: z.string(), lastConnectedAt: z.string(),
 });
 export type CampaignConnection = z.infer<typeof campaignConnectionSchema>;
+export const movemberGoalOverrideSchema = z.object({
+  campaignId: z.string().regex(/^member\/\d+\/\d{4}$/), currency, goal: money.positive(),
+});
+export const movemberGoalChangeSchema = movemberGoalOverrideSchema.extend({ goal: money.positive().nullable() }).strict();
 export const donationSchema = z.object({
   id: z.string(), donorName: z.string(), amount: money, currency, timestamp: z.string(),
   anonymous: z.boolean(), test: z.boolean().optional(),
@@ -71,10 +76,12 @@ export const alertSoundSchema = z.object({
   file: z.string().regex(/^[a-f0-9-]{36}\.(mp3|wav|ogg)$/).nullable(), name: z.string().max(200),
   enabled: z.boolean(), volume: z.number().min(0).max(1),
 });
-export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf']);
+export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf', 'cyberpunk', 'gta6']);
 export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
+export const overlayThemeNames: Record<OverlayTheme, string> = { classic: 'Custom', quest: 'Quest', bwf: 'BWF', cyberpunk: 'Cyberpunk', gta6: 'GTA VI' };
 export const overlayAnimationNames: Record<OverlayAnimation, string> = {
   'draw-left': 'Draw from left', 'rise-fade': 'Rise & fade', 'soft-zoom': 'Soft zoom',
+  'slide-right': 'Slide from right', 'center-reveal': 'Center reveal',
 };
 const hexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 export const classicColorsSchema = z.object({ font: hexColorSchema, accent: hexColorSchema, background: hexColorSchema });
@@ -104,6 +111,7 @@ export const overlayAppearanceSchema = z.object({ theme: overlayThemeSchema,
 export const schemas = {
   campaign: campaignSchema, settings: settingsSchema, connectionStatus: connectionSchema,
   campaignHistory: z.array(campaignConnectionSchema),
+  movemberGoalOverrides: z.array(movemberGoalOverrideSchema),
   recentDonations: z.array(donationSchema).max(50), currentAlert: alertSchema,
   donationHistory: z.array(donationEntrySchema), donationControl: z.object({ manual: z.boolean() }),
   eventLog: z.array(eventSchema).max(50), donationLedger: ledgerSchema,
@@ -129,6 +137,7 @@ export type ProviderConfig = Pick<SettingsState, 'campaignId' | 'campaignUrl'> &
 export type Commands = {
   connect: SettingsState; refresh: undefined; disconnect: undefined;
   saveSettings: Pick<SettingsState, 'pollingIntervalSeconds' | 'alertDurationSeconds'>;
+  setMovemberGoal: z.infer<typeof movemberGoalChangeSchema>;
   testAlert: undefined; clearQueue: undefined; dismissAlert: undefined;
   resendDonation: { donationId: string };
   sendDonation: { entryId: string };
@@ -150,6 +159,7 @@ export const defaultSettings: SettingsState = {
 export const defaults: Replicants = {
   campaign: emptyCampaign, settings: defaultSettings,
   campaignHistory: [],
+  movemberGoalOverrides: [],
   connectionStatus: { state: 'disconnected', provider: 'mock', message: 'Ready when you are. Connect a campaign to begin.', lastSuccessfulFetch: null, nextRetryAt: null },
   recentDonations: [], currentAlert: { donation: null, visible: false, queued: 0, entryId: null, queuedEntryIds: [] },
   donationHistory: [], donationControl: { manual: false },

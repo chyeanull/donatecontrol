@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import type { OverlayFont } from '../../shared/fonts';
+import type { GraphicFont } from '../../shared/fonts';
 
 // Each document loads only the selected family. Multiple previews share a link;
 // switching themes never removes a stylesheet another preview is still using.
-const fonts = new Map<OverlayFont, { link: HTMLLinkElement; users: number }>();
-export function useGoogleFont(font: OverlayFont | undefined) {
+const fonts = new Map<GraphicFont, { link: HTMLLinkElement; users: number }>();
+export function useGoogleFont(font: GraphicFont | undefined) {
   useEffect(() => {
     if (!font) return;
     let entry = fonts.get(font);

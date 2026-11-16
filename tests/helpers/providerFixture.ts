@@ -4,7 +4,7 @@ type DonorDriveResource = NonNullable<SettingsState['donorDriveResource']>;
 
 // Documented public API response shapes. The real adapters and CampaignService
 // consume these responses; only the HTTP transport is replaced in the tests.
-export type FixtureProvider = Exclude<ProviderKind, 'mock'>;
+export type FixtureProvider = Exclude<ProviderKind, 'mock' | 'movember'>;
 export interface FixtureDonation {
   id: string; name: string | null; amount: number | null; timestamp: string;
   message?: string; hidden?: boolean; failed?: boolean; otherCampaign?: boolean;

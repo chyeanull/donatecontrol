@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Thermometer } from '../shared/Graphics';
-import { graphicUrl, useReplicant } from '../shared/nodecg';
+import { useReplicant } from '../shared/nodecg';
 import { DEFAULT_ANIMATION_IN_MS, DEFAULT_ANIMATION_OUT_MS, MAX_ANIMATION_MS, animationMsSchema, customBorderWidthSchema, defaultClassicColors, emptyCampaign, overlayAnimationNames, type DonationAlert, type OverlayTheme, type OverlayAnimation } from '../../shared/models';
 import { parseHexColor, resolveOverlayAppearance } from '../../shared/appearance';
 import { customThemeStyle, overlayIcon } from '../shared/appearance';
@@ -13,16 +13,21 @@ import { ClassicColorControls } from './ClassicColorControls';
 import { CustomThemeControls } from './CustomThemeControls';
 import { OverlayIconControls } from './OverlayIconControls';
 import { notify } from './notifications';
+import { InfoTooltip } from './InfoTooltip';
 
 const themes = [
-  { id: 'classic', name: 'Custom', description: 'Make it yours with custom fonts, colors, borders, and corners.' },
+  { id: 'classic', name: 'Custom', description: null },
   { id: 'quest', name: 'Quest', description: 'Parchment lettering, antique gold, and an ornate frame for your campaign.' },
   { id: 'bwf', name: 'BWF', description: 'Foundation green, warm tan, and Source Sans Pro, drawn from the BWF brand guide.' },
+  { id: 'cyberpunk', name: 'Cyberpunk', description: 'Electric yellow, cyan details, and angular frames inspired by Night City.' },
+  { id: 'gta6', name: 'GTA VI', description: 'Sunset pink, warm cream, and bold lettering inspired by Vice City.' },
 ] as const;
 const animationDescriptions: Record<OverlayAnimation, string> = {
   'draw-left': 'The frame draws from left to right, followed by the title, amounts, and progress bar.',
   'rise-fade': 'The overlay lifts gently into place, with its details fading in one after another.',
   'soft-zoom': 'The overlay softly scales into view, followed by a subtle reveal of each detail.',
+  'slide-right': 'The overlay glides in from the right edge and eases into place as its details fade in.',
+  'center-reveal': 'The frame opens outward from the center like a curtain, revealing the text without moving it.',
 };
 const sampleCampaign = { ...emptyCampaign, title: 'Together, we can.', raised: 12500, goal: 25000, percent: 50 };
 
@@ -102,8 +107,6 @@ export function OverlaysPanel() {
   const previewAlert: DonationAlert = showLiveAlert ? { ...alert, visible: alertPreviewVisible } : {
     donation: { id: 'preview', message: 'Proud to support this community. Keep going!', donorName: 'Your generous donor', amount: 25, currency: previewCampaign.currency, timestamp: '', anonymous: false, test: true }, visible: alertPreviewVisible, queued: 0,
   };
-  const alertUrl = graphicUrl('alert');
-  const positioningUrl = alertUrl ? `${alertUrl}${alertUrl.includes('?') ? '&' : '?'}test=1` : '';
   return <PanelLayout page="overlays" controls={controls}>
     <div className="appearance-layout">
     <div className="appearance-grid">
@@ -111,7 +114,7 @@ export function OverlaysPanel() {
         <SectionTitle step="01" title="Overlay themes"/>
         <label htmlFor="overlay-theme">Theme<select id="overlay-theme" value={selected} disabled={disabled || testing} onChange={(event) => setSelected(event.target.value as OverlayTheme)}>{themes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
         <div className="theme-art selected-theme-preview" data-theme={selected} style={customThemeStyle(selected, classicColors, customTheme)} role="img" aria-label={`${theme.name} theme sample`}><span className="theme-art-title">{sampleIcon && <DonationIcon name={sampleIcon}/>}Together, we can.</span><span className="theme-art-amount">{theme.name}<span> theme preview</span></span><span className="theme-art-track"><span/></span></div>
-        <p className="appearance-description">{theme.description}</p>
+        {theme.description && <p className="appearance-description">{theme.description}</p>}
         {selected === 'classic' && <><ClassicColorControls value={colorInputs} preview={classicColors} disabled={disabled || testing} onChange={setColorInputs}/><CustomThemeControls value={customTheme} borderInput={borderInput} borderValid={borderValid} disabled={disabled || testing} onChange={setCustomOptions} onBorderChange={setBorderInput}/></>}
         <OverlayIconControls value={customTheme} disabled={disabled || testing} onChange={setCustomOptions}/>
         {selected === 'bwf' && <a className="brand-reference" href="https://brandguides.dam.gettyimages.com/bob-woodruff-foundation-brandguide/our-brand#identity" target="_blank" rel="noreferrer">BWF brand reference <Icon name="external"/></a>}
@@ -123,16 +126,14 @@ export function OverlaysPanel() {
           <div><label htmlFor="alert-animation">Donation alert animation<select id="alert-animation" value={alertAnimation} disabled={disabled || testing} onChange={(event) => setAlertAnimation(event.target.value as OverlayAnimation)}>{Object.entries(overlayAnimationNames).map(([value, name]) => <option key={value} value={value}>{name}</option>)}</select></label><p className="appearance-description">{animationDescriptions[alertAnimation]}</p></div>
         </div>
         <div className="two-fields animation-timing-fields">
-          <label htmlFor="animation-in-ms">Animation in <span className="unit">ms</span><input id="animation-in-ms" type="number" min="0" max={MAX_ANIMATION_MS} step="1" value={inInput} disabled={disabled || testing} aria-invalid={!inValid} onChange={(event) => setInInput(event.target.value)} onBlur={() => { if (!inValid) notify.error('Enter an animation-in time from 0–10,000 ms, using a whole number.'); }}/></label>
-          <label htmlFor="animation-out-ms">Alert animation out <span className="unit">ms</span><input id="animation-out-ms" type="number" min="0" max={MAX_ANIMATION_MS} step="1" value={outInput} disabled={disabled || testing} aria-invalid={!outValid} onChange={(event) => setOutInput(event.target.value)} onBlur={() => { if (!outValid) notify.error('Enter an animation-out time from 0–10,000 ms, using a whole number.'); }}/></label>
+          <div><div className="field-label-with-info"><label htmlFor="animation-in-ms">Animation in</label><InfoTooltip label="Animation in" text="Entry time for both overlays, added before the alert's fully visible duration. Higher values are slower; 0 is instant. The thermometer enters once on load, then stays visible."/><span className="unit">ms</span></div><input id="animation-in-ms" type="number" min="0" max={MAX_ANIMATION_MS} step="1" value={inInput} disabled={disabled || testing} aria-invalid={!inValid} onChange={(event) => setInInput(event.target.value)} onBlur={() => { if (!inValid) notify.error('Enter an animation-in time from 0–10,000 ms, using a whole number.'); }}/></div>
+          <div><div className="field-label-with-info"><label htmlFor="animation-out-ms">Alert animation out</label><InfoTooltip label="Alert animation out" text="Time a donation alert takes to leave, added after its fully visible duration. Higher values are slower; 0 is instant. Changes apply to the next alert. The thermometer does not animate out."/><span className="unit">ms</span></div><input id="animation-out-ms" type="number" min="0" max={MAX_ANIMATION_MS} step="1" value={outInput} disabled={disabled || testing} aria-invalid={!outValid} onChange={(event) => setOutInput(event.target.value)} onBlur={() => { if (!outValid) notify.error('Enter an animation-out time from 0–10,000 ms, using a whole number.'); }}/></div>
         </div>
         <p className="animation-timing-summary"><strong>{((animationInMs + settings.alertDurationSeconds * 1000 + animationOutMs) / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 })} seconds total per alert</strong><span>{animationInMs.toLocaleString()} ms in + {settings.alertDurationSeconds} seconds fully visible + {animationOutMs.toLocaleString()} ms out.</span></p>
-        <p className="fine-print">Animation in sets the entry speed for both overlays. Animation out applies only to donation alerts. Higher values animate more slowly; set 0 for an instant transition. Alert duration is set in Alert Settings and excludes animation time.</p>
-        <p className="fine-print">The thermometer enters once on load and stays on screen as donations update its total and progress bar. A new thermometer animation plays on its next load. Alert changes apply to the next alert. Reduced-motion preferences use a gentle fade.</p>
         <p className="fine-print">Use Test below to preview the thermometer entering and staying visible, alongside a full alert cycle.</p>
       </section>
     </div>
-    <aside className="theme-apply" aria-label="Apply overlay changes"><p>Preview changes here, then apply them to both live overlays.</p><button className="primary" disabled={disabled || testing || !changed || !inValid || !outValid || (selected === 'classic' && (!colorsValid || !borderValid))} onClick={() => void run('saveOverlayAppearance', { theme: selected, alertAnimation, thermometerAnimation, classicColors, customTheme, animationInMs, animationOutMs }, `${theme.name} appearance applied to both overlays.`)}>{busy === 'saveOverlayAppearance' ? 'Applying…' : 'Apply to overlays'}</button></aside>
+    <aside className="theme-apply" aria-label="Save overlay changes"><p>Preview changes here, then apply them to both live overlays.</p><button className="primary" disabled={disabled || testing || !changed || !inValid || !outValid || (selected === 'classic' && (!colorsValid || !borderValid))} onClick={() => void run('saveOverlayAppearance', { theme: selected, alertAnimation, thermometerAnimation, classicColors, customTheme, animationInMs, animationOutMs }, `${theme.name} appearance saved to both overlays.`)}>{busy === 'saveOverlayAppearance' ? 'Saving…' : 'Save Changes'}</button></aside>
     </div>
     <section className="card headed-card overlays"><SectionTitle step="02" title="Preview & connect">
       <div className="button-row overlay-test-actions">
@@ -140,13 +141,11 @@ export function OverlaysPanel() {
         <button className="secondary" disabled={disabled} onClick={() => void run('testAlert', undefined, 'Test alert queued for the live overlay. Your fundraising total is unchanged.')}><Icon name="monitor"/>Test on live overlay</button>
       </div>
     </SectionTitle>
-      <p className="section-description">Test below previews your current edits here, without sound. Test on live overlay sends a test alert to the HTML overlay using your applied settings and saved sound. Both work without a connected provider; test alerts leave campaign totals and donation history unchanged.</p>
       <div className="overlay-grid">
         <OverlayCard type="thermometer"><div className="mini-thermo"><Thermometer key={previewCycle} campaign={previewCampaign} theme={selected} animation={thermometerAnimation} classicColors={classicColors} customTheme={customTheme} animationInMs={previewTiming.animationInMs}/></div>{!connected && <span className="sample-label">SAMPLE · NOT ON AIR</span>}</OverlayCard>
         <OverlayCard type="alert"><AlertPreview key={previewCycle} alert={previewAlert} theme={selected} animation={alertAnimation} classicColors={classicColors} customTheme={customTheme} {...previewTiming}/>{!showLiveAlert && <span className="sample-label">SAMPLE · NOT ON AIR</span>}</OverlayCard>
       </div>
       <div className="obs-tip"><Icon name="monitor"/><span>In OBS, add a <b>Browser Source</b>, paste its URL, and use the dimensions shown. Keep NodeCG running during your stream.</span></div>
-      <div className="overlay-help"><p>Theme and animation changes update the graphics already open in OBS. Alert timing and sound settings live in <strong>Alert Settings</strong>.</p>{positioningUrl && <a className="text-button" href={positioningUrl} target="_blank" rel="noreferrer">Positioning test <Icon name="external"/></a>}</div>
     </section>
     <DemoPlayground controls={controls}/>
   </PanelLayout>;

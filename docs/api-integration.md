@@ -1,4 +1,4 @@
-# Official API integration notes
+# Provider API integration notes
 
 References inspected on October 2, 2026 and rechecked on November 3, 2026:
 
@@ -81,3 +81,26 @@ DonorDrive uses the public `message` field documented in [Donations](https://git
 ## Verification update — November 3, 2026
 
 See [Provider verification](provider-verification.md) for the tested feature matrix, live versus simulated evidence, fixes, and remaining limits. Givebutter’s current OpenAPI permits a receipt-only TransactionResource variant without campaign/public supporter data; those validated records are omitted instead of rejecting the entire donation poll. GoFundMe Pro campaign responses are checked against the requested numeric ID.
+
+
+## Movember public member feed
+
+Verified **November 16, 2026** using the user-supplied [donation feed](https://api.movember.com/v18/newsfeed/?entity_type=0&entity_id=14056397&filter_type=donation), [member summary](https://api.movember.com/v18/member/14056397), [US campaign configuration](https://api.movember.com/v18/configuration?countryCode=us), and the official [Mo Space page](https://us.movember.com/mospace/14056397). The site's public [API client](https://us.movember.com/assets/build/js-min/main.js) calls `member/{id}` and `configuration?countryCode=…`; its [Mo Space code](https://us.movember.com/assets/build/js-min/section/mospace.js) uses `before_date` for newsfeed pagination. No public integration specification or published rate limit was found. Treat this as an observed public endpoint contract that may change, rather than a guaranteed third-party API.
+
+| Purpose | Request | Fields consumed |
+| --- | --- | --- |
+| Public member and totals | `GET https://api.movember.com/v18/member/{id}` | `id`, `entityType`, `visibility`, `fullName`, `countryCode`, `currencyCode`, `targetAmount`, `AmountRaised.originalAmount`, `AmountRaised.originalCurrencyCode` |
+| Current fundraising year | `GET https://api.movember.com/v18/configuration?countryCode={country}` | `country`, `campaign.current.year`, `campaignStart`, `campaignEnd` |
+| Public donations | `GET https://api.movember.com/v18/newsfeed/?entity_type=0&entity_id={id}&filter_type=donation&limit=30` | `id`, `created`, `viewtype`, `isHidden`, `entity.id/type`, and the public donation metadata below |
+
+Only fixed `api.movember.com` URLs are requested. Inputs may be numeric IDs, numeric `/mospace/` page URLs, or member donation-feed URLs; a custom `/m/` alias also requires its numeric ID. Reject conflicting URL/ID pairs, other entity types, credentials, non-HTTPS URLs, and custom ports. No authentication headers, cookies, profile scraping, or private account endpoints are needed at runtime.
+
+**Totals and currency:** use the original raised amount and currency. The supplied member response also contained an AUD conversion, which must not be paired with the USD fundraising target. Do not calculate the thermometer total from the public donation list or substitute a public record count for Movember's unavailable total donation count. The Movember-only local goal override is applied by the campaign service after a complete API snapshot, leaving the adapter's target intact for Reset. Store overrides per member/year/currency; they change the effective goal and percentage everywhere without writing to the provider. Require a public member profile and consistent original currencies.
+
+**Privacy:** include only `viewtype=donation`, the requested member, a non-hidden post, `metadata.show=true`, `metadata.is_current_campaign=true`, and a date within the current campaign bounds. Use `metadata.id` as the stable donation ID, `metadata.amount/currency`, and `metadata.donor.name`; force **Anonymous** when `metadata.anonymous=true` or the public name is absent. Include `metadata.message` only when `metadata.show_message=true`. Never copy `author`, `raw`, contact/account IDs, fitness/chat fields, profile metadata, or billing details into Replicants or logs. Zero amounts are excluded. Normalization validates the public fields rather than accepting malformed successful responses.
+
+**Dates and paging:** the feed's `YYYY-MM-DD HH:mm:ss` creation values match the public page's UTC Unix timestamps. Normalize them explicitly as UTC; do not interpret them in the NodeCG host's timezone. Start each scan at the newest page. `before_date` accepts a UTC date string; overlap the final second to preserve tied timestamps and deduplicate by donation ID. A normal page is 30 records. Increase to 90 only when needed to move through ties; live probes showed that requests for 100 or 300 are capped at 90, while `page_size` and `offset` were ignored. Do not claim those parameters provide pagination. If 90 records fill the same boundary second, completeness cannot be established: return a clear error, never a partial snapshot. Stop at a short page, the prior-year boundary, or a timestamp strictly older than the previous successful scan. Limit scans to 100 requests. Cache only complete successful snapshots, and do not advance the watermark on a failed scan.
+
+The campaign key is `movember:member/{id}/{year}`. The country configuration determines the active year, including its local campaign boundary expressed as UTC. Cache it for at most one hour and no longer than the current campaign end. Initial/reconnect history never alerts. Empty-baseline watermarks and the shared alert ledger use second precision for Movember so an arrival in the same second as connection is not dropped. Subsequent donations enter the standard archive and alert pipeline; manual mode still updates campaign totals while withholding playback.
+
+**Pacing and errors:** the application enforces a 15-second minimum polling interval and caches complete snapshots for that interval. This is an application default, not a claimed Movember rate-limit policy. Space HTTP requests at least 250 ms apart, honor 429/5xx `Retry-After`, abort on disconnect, and reject redirects. Each request times out after 12 seconds. Invalid JSON/schema, private/missing members, cursor failures, or inconsistent identities are explicit errors; incomplete scans commit no totals, archive entries, or alerts.

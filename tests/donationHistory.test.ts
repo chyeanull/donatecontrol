@@ -26,21 +26,21 @@ describe('persistent donation list and manual alert control', () => {
     service.setManualAlertControl({ manual: true });
     await service.connect(defaults.settings);
     await service.addMockDonation({ donorName: 'Held donation', amount: 12, message: 'Waiting for the producer' });
-    const entry = state.donationHistory[0];
+    const entry = state.donationHistory.at(-1)!;
     expect(state.campaign.raised).toBe(12512);
     expect(entry.sentCount).toBe(0);
     expect(state.currentAlert.visible).toBe(false);
     expect(state.currentAlert.queued).toBe(0);
     service.sendDonation({ entryId: entry.id });
     service.sendDonation({ entryId: entry.id });
-    expect(state.donationHistory[0].sentCount).toBe(1);
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(1);
     expect(state.currentAlert.queuedEntryIds).toEqual([entry.id]);
     service.alerts.dismiss();
     await vi.advanceTimersByTimeAsync(DEFAULT_ANIMATION_OUT_MS);
-    expect(state.donationHistory[0].sentCount).toBe(2);
-    expect(state.donationHistory[0].lastSentAt).toBeTruthy();
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(2);
+    expect(state.donationHistory.at(-1)!.lastSentAt).toBeTruthy();
     expect(state.campaign.raised).toBe(12512);
-    expect(state.donationHistory).toHaveLength(1);
+    expect(state.donationHistory).toHaveLength(11);
     await service.disconnect();
   });
 
@@ -59,9 +59,9 @@ describe('persistent donation list and manual alert control', () => {
     expect(state.currentAlert.visible).toBe(false);
     await service.addMockDonation({ donorName: 'Automatic', amount: 20 });
     expect(state.currentAlert.donation?.donorName).toBe('Automatic');
-    expect(state.donationHistory.map((item) => item.sentCount)).toEqual([0, 1]);
+    expect(state.donationHistory.slice(10).map((item) => item.sentCount)).toEqual([0, 1]);
     await service.refresh();
-    expect(state.donationHistory.map((item) => item.sentCount)).toEqual([0, 1]);
+    expect(state.donationHistory.slice(10).map((item) => item.sentCount)).toEqual([0, 1]);
     await service.disconnect();
   });
 
@@ -72,13 +72,13 @@ describe('persistent donation list and manual alert control', () => {
     await service.addMockDonation({ donorName: 'On screen', amount: 10 });
     await service.addMockDonation({ donorName: 'Pending', amount: 20 });
     expect(state.currentAlert.queued).toBe(1);
-    expect(state.donationHistory.map((item) => item.sentCount)).toEqual([1, 0]);
+    expect(state.donationHistory.slice(10).map((item) => item.sentCount)).toEqual([1, 0]);
     service.setManualAlertControl({ manual: true });
     expect(state.currentAlert.visible).toBe(true);
     expect(state.currentAlert.queued).toBe(0);
     await vi.advanceTimersByTimeAsync(6000 + DEFAULT_ANIMATION_IN_MS + DEFAULT_ANIMATION_OUT_MS);
     expect(state.currentAlert.visible).toBe(false);
-    expect(state.donationHistory.map((item) => item.sentCount)).toEqual([1, 0]);
+    expect(state.donationHistory.slice(10).map((item) => item.sentCount)).toEqual([1, 0]);
     await service.disconnect();
   });
 
@@ -87,16 +87,16 @@ describe('persistent donation list and manual alert control', () => {
     const { state, service } = setup();
     await service.connect(defaults.settings);
     await service.addMockDonation({ donorName: 'Original donor', amount: 50, message: 'Original message' });
-    const entry = structuredClone(state.donationHistory[0]);
+    const entry = structuredClone(state.donationHistory.at(-1)!);
     const original = structuredClone(state.recentDonations);
     service.sendDonation({ entryId: entry.id });
     service.editDonation({ entryId: entry.id, donorName: '  Edited donor  ', message: '  Edited message  ' });
     expect(state.currentAlert.donation?.donorName).toBe('Original donor');
-    expect(state.donationHistory[0]).toMatchObject({ donorName: 'Edited donor', message: 'Edited message', donation: entry.donation });
+    expect(state.donationHistory.at(-1)!).toMatchObject({ donorName: 'Edited donor', message: 'Edited message', donation: entry.donation });
     service.alerts.dismiss(); await vi.advanceTimersByTimeAsync(DEFAULT_ANIMATION_OUT_MS);
     expect(state.currentAlert.donation).toMatchObject({ donorName: 'Edited donor', message: 'Edited message', amount: 50, test: true });
     await service.refresh();
-    expect(state.donationHistory[0].donorName).toBe('Edited donor');
+    expect(state.donationHistory.at(-1)!.donorName).toBe('Edited donor');
     expect(state.recentDonations).toEqual(original);
     expect(state.campaign.raised).toBe(12550);
     await service.disconnect();
@@ -108,7 +108,7 @@ describe('persistent donation list and manual alert control', () => {
     await service.connect(defaults.settings);
     service.setManualAlertControl({ manual: true });
     await service.addMockDonation({ donorName: 'Persistent donor', amount: 10, message: 'Keep this' });
-    const id = state.donationHistory[0].id;
+    const id = state.donationHistory.at(-1)!.id;
     service.editDonation({ entryId: id, donorName: 'Saved name', message: 'Saved text' });
     service.sendDonation({ entryId: id });
     await service.disconnect();
@@ -120,7 +120,7 @@ describe('persistent donation list and manual alert control', () => {
     expect(restarted.state.donationHistory).toEqual(state.donationHistory);
     restarted.service.sendDonation({ entryId: id });
     expect(restarted.state.currentAlert.donation).toMatchObject({ donorName: 'Saved name', message: 'Saved text' });
-    expect(restarted.state.donationHistory[0].sentCount).toBe(2);
+    expect(restarted.state.donationHistory.at(-1)!.sentCount).toBe(2);
     await restarted.service.disconnect();
   });
 
@@ -130,21 +130,21 @@ describe('persistent donation list and manual alert control', () => {
     service.setManualAlertControl({ manual: true });
     await service.connect(defaults.settings);
     await service.addMockDonation({ donorName: 'Original name', amount: 50, message: 'Original text' });
-    const entry = structuredClone(state.donationHistory[0]);
+    const entry = structuredClone(state.donationHistory.at(-1)!);
     service.editDonation({ entryId: entry.id, donorName: 'Edited name', message: 'Edited text' });
     service.sendDonation({ entryId: entry.id });
     service.sendDonation({ entryId: entry.id });
     service.resetDonation({ entryId: entry.id });
-    expect(state.donationHistory[0]).toMatchObject({ donorName: 'Original name', message: 'Original text', editedAt: null, sentCount: 1, donation: entry.donation });
+    expect(state.donationHistory.at(-1)!).toMatchObject({ donorName: 'Original name', message: 'Original text', editedAt: null, sentCount: 1, donation: entry.donation });
     expect(state.currentAlert.donation?.donorName).toBe('Edited name');
     expect(state.campaign.raised).toBe(12550);
     service.alerts.dismiss(); await vi.advanceTimersByTimeAsync(DEFAULT_ANIMATION_OUT_MS);
     expect(state.currentAlert.donation).toMatchObject({ donorName: 'Original name', message: 'Original text' });
-    expect(state.donationHistory[0].sentCount).toBe(2);
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(2);
     await service.disconnect();
     const restarted = setup(JSON.parse(JSON.stringify(state)) as Replicants);
     expect(restarted.state.donationHistory).toEqual(state.donationHistory);
-    expect(restarted.state.donationHistory[0].editedAt).toBeNull();
+    expect(restarted.state.donationHistory.at(-1)!.editedAt).toBeNull();
   });
 
   it('marks only changed content as edited and restores originals without applying manual-edit limits', () => {
@@ -196,14 +196,14 @@ describe('persistent donation list and manual alert control', () => {
     service.setManualAlertControl({ manual: true });
     await service.connect(defaults.settings);
     await service.addMockDonation({ donorName: 'Saved while held', amount: 10 });
-    const id = state.donationHistory[0].id;
-    expect(state.donationHistory[0].sentCount).toBe(0);
+    const id = state.donationHistory.at(-1)!.id;
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(0);
     service.sendDonation({ entryId: id }); service.sendDonation({ entryId: id });
     service.alerts.clear();
-    expect(state.donationHistory[0].sentCount).toBe(1);
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(1);
     await service.resetMock();
-    expect(state.donationHistory).toHaveLength(1);
-    expect(state.donationHistory[0].sentCount).toBe(1);
+    expect(state.donationHistory).toHaveLength(11);
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(1);
     expect(state.currentAlert.donation).toBeNull();
     await service.disconnect();
   });

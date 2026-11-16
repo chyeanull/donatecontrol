@@ -22,3 +22,5 @@ export const overlayFonts = [
   "Ubuntu"
 ] as const;
 export type OverlayFont = typeof overlayFonts[number];
+// Preset-only fonts do not expand the Custom theme's 20-family dropdown.
+export type GraphicFont = OverlayFont | 'Rajdhani';

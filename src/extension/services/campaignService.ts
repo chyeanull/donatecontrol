@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import type { Commands, Replicants, SettingsState } from '../../shared/models';
+import type { CampaignState, Commands, Replicants, SettingsState } from '../../shared/models';
 import { providerNames } from '../../shared/models';
-import { formatCurrency } from '../../shared/format';
+import { formatCurrency, percentage } from '../../shared/format';
 import { ProviderError, publicError, type FundraisingProvider } from '../providers/FundraisingProvider';
 import { MockProvider } from '../providers/MockProvider';
 import { GoFundMeProProvider } from '../providers/GoFundMeProProvider';
 import { DonorDriveProvider } from '../providers/DonorDriveProvider';
 import { GivebutterProvider } from '../providers/GivebutterProvider';
+import { MovemberProvider } from '../providers/MovemberProvider';
 import { AlertQueue } from './alertQueue';
 import { detectDonations } from './donationService';
 import { DonationHistory } from './donationHistory';
@@ -24,6 +25,8 @@ export class CampaignService {
   private generation = 0;
   private readonly mock: MockProvider;
   private readonly donorDrive = new DonorDriveProvider();
+  private readonly movember = new MovemberProvider();
+  private movemberCampaign?: CampaignState;
   private readonly history: DonationHistory;
   readonly alerts: AlertQueue;
   constructor(private readonly store: StateStore, private readonly log: (message: string, error?: boolean) => void,
@@ -48,8 +51,8 @@ export class CampaignService {
     if (this.provider && active !== settings.provider) {
       throw new ProviderError(`Disconnect ${providerNames[active]} before switching to ${providerNames[settings.provider]}.`);
     }
-    if (settings.provider === 'donordrive' && settings.pollingIntervalSeconds < 15) {
-      throw new ProviderError('DonorDrive requires a refresh interval of at least 15 seconds.');
+    if (['donordrive', 'movember'].includes(settings.provider) && settings.pollingIntervalSeconds < 15) {
+      throw new ProviderError(`${providerNames[settings.provider]} requires a refresh interval of at least 15 seconds.`);
     }
     await this.disconnect(false);
     const session = ++this.generation;
@@ -57,6 +60,7 @@ export class CampaignService {
     this.store.set('connectionStatus', { state: 'connecting', provider: settings.provider,
       message: 'Connecting and establishing a donation baseline…', lastSuccessfulFetch: null, nextRetryAt: null });
     const provider = settings.provider === 'mock' ? this.mock : settings.provider === 'donordrive' ? this.donorDrive
+      : settings.provider === 'movember' ? this.movember
       : settings.provider === 'givebutter' ? new GivebutterProvider(this.getGivebutterKey()) : new GoFundMeProProvider(this.getCredentials());
     this.provider = provider;
     let authenticated = false;
@@ -64,18 +68,21 @@ export class CampaignService {
     const poller = new PollingService(async () => {
       // A donation can arrive while a paginated baseline is still loading. Use
       // the scan's start, so an unseen arrival is eligible on the next poll.
-      const scanStartedAt = new Date().toISOString();
+      // Movember timestamps have only second precision. Keep arrivals from the
+      // baseline's final second eligible; known IDs still prevent replay.
+      const scanStartedAt = new Date(settings.provider === 'movember' ? Math.floor(Date.now() / 1000) * 1000 : Date.now()).toISOString();
       if (!authenticated) { await provider.connect(settings); authenticated = true; }
       if (session !== this.generation) return;
       const campaign = await provider.getCampaign();
       const donations = await provider.getRecentDonations();
       if (session !== this.generation) return;
       const key = settings.provider === 'donordrive' ? `donordrive:${new URL(settings.campaignUrl).origin}:${campaign.id}`
-        : `${settings.provider}:${settings.provider === 'mock' ? 'demo' : settings.provider === 'givebutter' ? campaign.id : settings.campaignId}`;
+        : `${settings.provider}:${settings.provider === 'mock' ? 'demo' : ['givebutter', 'movember'].includes(settings.provider) ? campaign.id : settings.campaignId}`;
       const result = detectDonations(donations, this.store.get('donationLedger'), key, baseline, scanStartedAt);
       // Commit the ledger before exposing any alerts. Incomplete polls commit nothing.
       this.store.set('donationLedger', result.ledger);
-      this.store.set('campaign', campaign);
+      if (settings.provider === 'movember') this.movemberCampaign = campaign;
+      this.store.set('campaign', settings.provider === 'movember' ? this.withMovemberGoal(campaign) : campaign);
       this.store.set('recentDonations', result.recent);
       const { entries, added } = this.history.capture(donations, key, campaign.title);
       // Only complete, successful connections enter history. Polling does not
@@ -116,6 +123,7 @@ export class CampaignService {
     ++this.generation;
     this.poller?.stop(); this.poller = undefined;
     const previous = this.provider; this.provider = undefined;
+    this.movemberCampaign = undefined;
     await previous?.disconnect();
     this.alerts.stop();
     this.store.set('campaign', { ...this.store.get('campaign'), connected: false });
@@ -127,9 +135,32 @@ export class CampaignService {
     if (!this.poller) throw new ProviderError('Connect a campaign first.');
     await this.poller.refresh();
   }
+  private withMovemberGoal(campaign: CampaignState): CampaignState {
+    const override = this.store.get('movemberGoalOverrides').find((entry) =>
+      entry.campaignId === campaign.id && entry.currency === campaign.currency);
+    const goal = override?.goal ?? campaign.goal;
+    return { ...campaign, goal, percent: percentage(campaign.raised, goal), goalOverridden: Boolean(override) };
+  }
+  setMovemberGoal({ campaignId, currency, goal }: Commands['setMovemberGoal']) {
+    const campaign = this.movemberCampaign;
+    if (this.provider !== this.movember || this.store.get('connectionStatus').state !== 'connected' || !campaign) {
+      throw new ProviderError('Connect a Movember campaign before changing its fundraising goal.');
+    }
+    if (campaign.id !== campaignId || campaign.currency !== currency) {
+      throw new ProviderError('The connected campaign changed. Open Edit again to change its fundraising goal.');
+    }
+    const overrides = this.store.get('movemberGoalOverrides').filter((entry) =>
+      entry.campaignId !== campaignId || entry.currency !== currency);
+    if (goal !== null) overrides.push({ campaignId, currency, goal });
+    this.store.set('movemberGoalOverrides', overrides);
+    this.store.set('campaign', this.withMovemberGoal(campaign));
+    this.log(goal === null ? 'Movember fundraising goal reset to the API amount'
+      : `Movember fundraising goal set to ${formatCurrency(goal, currency)}`);
+  }
   saveSettings(value: Commands['saveSettings']) {
-    if (this.store.get('settings').provider === 'donordrive' && value.pollingIntervalSeconds < 15) {
-      throw new ProviderError('DonorDrive requires a refresh interval of at least 15 seconds.');
+    const provider = this.store.get('settings').provider;
+    if (['donordrive', 'movember'].includes(provider) && value.pollingIntervalSeconds < 15) {
+      throw new ProviderError(`${providerNames[provider]} requires a refresh interval of at least 15 seconds.`);
     }
     this.store.set('settings', { ...this.store.get('settings'), ...value, alertsEnabled: true });
     this.log('Broadcast settings saved');

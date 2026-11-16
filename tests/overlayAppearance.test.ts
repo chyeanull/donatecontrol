@@ -25,12 +25,14 @@ describe('overlay appearance compatibility and colors', () => {
     }
   });
 
-  it('saves separate styles and preserves them across reloads and older client updates', () => {
-    const saved = resolveOverlayAppearance(overlayAppearanceSchema.parse({ theme: 'classic', alertAnimation: 'soft-zoom', thermometerAnimation: 'draw-left', animationInMs: 800, animationOutMs: 300 }));
+  it.each([
+    ['soft-zoom', 'draw-left'], ['slide-right', 'center-reveal'], ['center-reveal', 'slide-right'],
+  ] as const)('preserves separate styles %s / %s across reloads and older client updates', (alertAnimation, thermometerAnimation) => {
+    const saved = resolveOverlayAppearance(overlayAppearanceSchema.parse({ theme: 'classic', alertAnimation, thermometerAnimation, animationInMs: 800, animationOutMs: 300 }));
     const reloaded = resolveOverlayAppearance(JSON.parse(JSON.stringify(saved)));
     expect(reloaded).toEqual(saved);
     expect(resolveOverlayAppearance({ theme: 'quest', animation: 'rise-fade' }, reloaded)).toMatchObject({
-      theme: 'quest', alertAnimation: 'soft-zoom', thermometerAnimation: 'draw-left', animationInMs: 800, animationOutMs: 300,
+      theme: 'quest', alertAnimation, thermometerAnimation, animationInMs: 800, animationOutMs: 300,
     });
   });
 
@@ -78,7 +80,7 @@ describe('overlay appearance compatibility and colors', () => {
     expect(customThemeStyle('classic', colors)).toMatchObject({
       '--graphic-ink': colors.font, '--graphic-accent': colors.accent, '--graphic-surface': colors.background,
       '--graphic-muted': 'color-mix(in srgb, #eef2ff 68%, #102030)',
-      '--graphic-border': 'color-mix(in srgb, #ff8844 40%, #102030)',
+      '--graphic-border': colors.accent,
     });
     expect(customThemeStyle('quest', colors)).toBeUndefined();
     expect(customThemeStyle('bwf', colors)).toBeUndefined();
@@ -125,7 +127,7 @@ describe('overlay appearance compatibility and colors', () => {
     expect(customThemeStyle('classic', colors, defaultCustomTheme)).toMatchObject({ '--graphic-border-width': '1px', '--graphic-radius': '18px' });
     expect(overlayIcon(custom)).toBe('gift');
     expect(overlayIcon({ ...custom, iconEnabled: false })).toBeNull();
-    for (const theme of ['quest', 'bwf'] as const) {
+    for (const theme of ['quest', 'bwf', 'cyberpunk', 'gta6'] as const) {
       expect(customThemeStyle(theme, colors, custom)).toBeUndefined();
       expect(overlayIcon({ ...custom, iconEnabled: false })).toBeNull();
     }

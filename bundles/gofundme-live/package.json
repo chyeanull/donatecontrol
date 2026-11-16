@@ -7,7 +7,7 @@
     "dashboardPanels": [
       {
         "name": "control",
-        "title": "01 · Main",
+        "title": "01 · Campaign",
         "file": "control.html",
         "fullbleed": true
       },

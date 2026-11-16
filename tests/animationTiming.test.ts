@@ -27,29 +27,31 @@ describe('animation time around the fully-visible alert duration', () => {
     queue.stop();
   });
 
-  it('snapshots current timing and animation, then uses new settings for the next queued alert', () => {
+  it.each([
+    ['soft-zoom', 'rise-fade'], ['slide-right', 'center-reveal'], ['center-reveal', 'slide-right'],
+  ] as const)('keeps %s until the current alert finishes, then uses %s for the next alert', (firstAnimation, nextAnimation) => {
     vi.useFakeTimers();
     const state = structuredClone(defaults);
     const store: StateStore = {
       get: <K extends keyof Replicants>(key: K) => structuredClone(state[key]),
       set: <K extends keyof Replicants>(key: K, value: Replicants[K]) => { schemas[key].parse(value); state[key] = structuredClone(value); },
     };
-    state.overlayAppearance = { ...state.overlayAppearance, alertAnimation: 'soft-zoom', thermometerAnimation: 'draw-left', animationInMs: 1200, animationOutMs: 900 };
+    state.overlayAppearance = { ...state.overlayAppearance, alertAnimation: firstAnimation, thermometerAnimation: 'draw-left', animationInMs: 1200, animationOutMs: 900 };
     state.settings.alertDurationSeconds = 3;
     const service = new CampaignService(store, () => {}, () => ({}));
     service.testAlert(); service.testAlert();
     const firstId = state.currentAlert.donation!.id;
     vi.advanceTimersByTime(400);
-    state.overlayAppearance = { ...state.overlayAppearance, alertAnimation: 'rise-fade', thermometerAnimation: 'soft-zoom', animationInMs: 0, animationOutMs: 250 };
+    state.overlayAppearance = { ...state.overlayAppearance, alertAnimation: nextAnimation, thermometerAnimation: 'soft-zoom', animationInMs: 0, animationOutMs: 250 };
     service.saveSettings({ alertDurationSeconds: 2, pollingIntervalSeconds: 15 });
-    expect(state.currentAlert.playback).toEqual({ animation: 'soft-zoom', animationInMs: 1200, animationOutMs: 900 });
+    expect(state.currentAlert.playback).toEqual({ animation: firstAnimation, animationInMs: 1200, animationOutMs: 900 });
     vi.advanceTimersByTime(3800);
     expect(state.currentAlert.visible).toBe(false);
     vi.advanceTimersByTime(899);
     expect(state.currentAlert.donation!.id).toBe(firstId);
     vi.advanceTimersByTime(1);
     expect(state.currentAlert.donation!.id).not.toBe(firstId);
-    expect(state.currentAlert.playback).toEqual({ animation: 'rise-fade', animationInMs: 0, animationOutMs: 250 });
+    expect(state.currentAlert.playback).toEqual({ animation: nextAnimation, animationInMs: 0, animationOutMs: 250 });
     vi.advanceTimersByTime(1999); expect(state.currentAlert.visible).toBe(true);
     vi.advanceTimersByTime(1); expect(state.currentAlert.visible).toBe(false);
     vi.advanceTimersByTime(250); expect(state.currentAlert.donation).toBeNull();

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { BrandIcon } from './BrandIcon';
+import { DashboardNavigation } from './DashboardNavigation';
 import { send, useCampaignConnected, useReplicant, useSocketConnected } from '../shared/nodecg';
 import { providerNames, type Commands } from '../../shared/models';
 import { dashboardPages, type DashboardPage } from '../../shared/dashboard';
@@ -36,22 +37,25 @@ export function useControls() {
   return { status, settings, online, connected, busy, setBusy, run, disabled: Boolean(busy) || !online };
 }
 export function PanelLayout({ page, controls, children }: { page: DashboardPage; controls: ReturnType<typeof useControls>; children: ReactNode }) {
-  const { status, online } = controls;
+  const { status, online, connected } = controls;
+  const campaign = useReplicant('campaign');
   const standalone = window.self === window.top;
   const currentPage = dashboardPages.find((item) => item.id === page)!;
   const connectionLabel = !online ? 'Server offline'
     : status.state === 'disconnected' ? 'No provider connected'
     : `${providerNames[status.provider]} · ${status.state === 'error' ? 'Connection error' : status.state}`;
-  return <main className={`app page-${page}`} id="overview" aria-label={currentPage.title}>
-    <header className="masthead">
-      <h1 className="tab-title">{currentPage.label}</h1>
-      <div className="header-right"><span className={`status-pill ${online ? status.state : 'error'}`} role="status"><i aria-hidden="true"/>{connectionLabel}</span></div>
+  return <>
+    <header className="connection-bar" aria-label="Campaign connection">
+      {connected && <span className="connection-bar-title" title={campaign.title}>{campaign.title}</span>}
+      <span className={`status-pill ${online ? status.state : 'error'}`} role="status"><i aria-hidden="true"/>{connectionLabel}</span>
     </header>
-    {standalone && <nav className="panel-nav" aria-label="Control panel pages">{dashboardPages.map((item) => <a key={item.id} href={`./${item.panel}.html?standalone=true`} aria-current={page === item.id ? 'page' : undefined}><span>{item.order}</span>{item.label}</a>)}</nav>}
+    <main className={`app page-${page}`} id="overview" aria-label={currentPage.title}>
+    {standalone && <DashboardNavigation page={page}/>}
     {children}
     <footer className="app-footer">
       <a className="brand" href="#overview"><span className="brand-symbol"><BrandIcon/></span><span>DONATECONTROL</span></a>
       <small className="footer-credit">made by <a href="https://roberthilsky.com" target="_blank" rel="noopener noreferrer">roberthilsky.com</a></small>
     </footer>
-  </main>;
+    </main>
+  </>;
 }

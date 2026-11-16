@@ -79,7 +79,9 @@
           "enum": [
             "draw-left",
             "rise-fade",
-            "soft-zoom"
+            "soft-zoom",
+            "slide-right",
+            "center-reveal"
           ]
         },
         "animationInMs": {

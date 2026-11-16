@@ -4,9 +4,34 @@ import { defaults } from '../../shared/models';
 import { percentage } from '../../shared/format';
 import type { FundraisingProvider } from './FundraisingProvider';
 
+const demoDonations = [
+  ['Alex', 25, 'Happy to help. Keep up the great work!'],
+  ['Sam', 50, 'Cheering you on from home!'],
+  ['Jordan', 100, 'For everyone making a difference today.'],
+  ['Taylor', 20, 'First time watching, glad to be here!'],
+  ['Anonymous', 75, 'Sending a little support your way.'],
+  ['Morgan', 12.5, 'Every little bit helps.'],
+  ['Casey', 250, 'A big thank you to the whole team!'],
+  ['Riley', 35, 'Let’s get closer to that goal.'],
+  ['Jamie', 150, 'In honor of the people who always show up for others.'],
+  ['Community Crew', 500, 'A group donation from all of us. You’ve got this!'],
+] as const;
+
 export class MockProvider implements FundraisingProvider {
   constructor(private readonly read: () => MockState, private readonly write: (state: MockState) => void) {}
-  async connect(_config: ProviderConfig) {}
+  async connect(_config: ProviderConfig) {
+    const state = this.read();
+    const ids = new Set(state.donations.map((donation) => donation.id));
+    const now = Date.now();
+    // Historical samples belong to the existing demo total. Stable IDs preserve
+    // archive edits/send counts across reconnects and resets, without replaying.
+    const samples: Donation[] = demoDonations.map(([donorName, amount, message], index) => ({
+      id: `mock-demo-${index + 1}`, donorName, amount, message,
+      currency: state.campaign.currency, anonymous: donorName === 'Anonymous', test: true,
+      timestamp: new Date(now - (demoDonations.length - index) * 60_000).toISOString(),
+    })).filter((donation) => !ids.has(donation.id));
+    if (samples.length) this.write({ ...state, donations: [...samples, ...state.donations].slice(-1000) });
+  }
   async disconnect() {}
   async getCampaign(): Promise<CampaignState> {
     const state = this.read().campaign;

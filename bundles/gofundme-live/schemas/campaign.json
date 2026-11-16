@@ -32,6 +32,9 @@
       "type": "number",
       "minimum": 0
     },
+    "goalOverridden": {
+      "type": "boolean"
+    },
     "donationCount": {
       "type": "integer",
       "minimum": 0,

@@ -11,8 +11,7 @@ const fields = [
 export function ClassicColorControls({ value, preview, disabled, onChange }: {
   value: ClassicColors; preview: ClassicColors; disabled: boolean; onChange: (value: ClassicColors) => void;
 }) {
-  return <fieldset className="classic-colors" disabled={disabled}>
-    <legend>Colors</legend>
+  return <fieldset className="classic-colors" disabled={disabled} aria-label="Theme colors">
     <div className="classic-color-grid">{fields.map(({ key, label }) => <div className="classic-color-field" key={key}>
       <label htmlFor={`classic-${key}-hex`}>{label}</label>
       <div className="color-input-pair">

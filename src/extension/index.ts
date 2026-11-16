@@ -11,6 +11,7 @@ import { mountCredentialRoutes, mountSecretRoutes } from './credentialRoutes';
 import { AlertSoundFiles } from './services/alertSoundFiles';
 import { mountAlertSoundRoutes } from './alertSoundRoutes';
 import { resolveOverlayAppearance } from '../shared/appearance';
+import { movemberGoalChangeSchema, overlayThemeNames } from '../shared/models';
 
 export default function extension(nodecg: NodeCG.ServerAPI) {
   loadEnv({ quiet: true });
@@ -21,6 +22,7 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
   const reps = {
     campaign: create('campaign'), settings: create('settings'), connectionStatus: create('connectionStatus'),
     campaignHistory: create('campaignHistory'),
+    movemberGoalOverrides: create('movemberGoalOverrides'),
     recentDonations: create('recentDonations'), currentAlert: create('currentAlert'), eventLog: create('eventLog'),
     donationLedger: create('donationLedger'), mockState: create('mockState'),
     credentialStatus: create('credentialStatus'),
@@ -99,6 +101,8 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
   command('refresh', noData, () => service.refresh());
   command('disconnect', noData, () => service.disconnect());
   command('saveSettings', settingsSchema.pick({ pollingIntervalSeconds: true, alertDurationSeconds: true }), (data) => service.saveSettings(data));
+  command('setMovemberGoal', movemberGoalChangeSchema, (data) => service.setMovemberGoal(data),
+    'Enter a fundraising goal greater than zero and no more than 1 trillion.');
   command('testAlert', noData, () => service.testAlert());
   command('resendDonation', z.object({ donationId: z.string().min(1).max(4096) }).strict(), (data) => service.resendDonation(data));
   command('sendDonation', z.object({ entryId: z.string().uuid() }).strict(), (data) => service.sendDonation(data));
@@ -113,7 +117,7 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
     const appearance = resolveOverlayAppearance(data, store.get('overlayAppearance'));
     const { alertAnimation, thermometerAnimation } = appearance;
     store.set('overlayAppearance', appearance);
-    log(`Overlay appearance saved · ${data.theme === 'bwf' ? 'BWF' : data.theme === 'quest' ? 'Quest' : 'Custom'} · alerts: ${overlayAnimationNames[alertAnimation]} · thermometer: ${overlayAnimationNames[thermometerAnimation]}`);
+    log(`Overlay appearance saved · ${overlayThemeNames[data.theme]} · alerts: ${overlayAnimationNames[alertAnimation]} · thermometer: ${overlayAnimationNames[thermometerAnimation]}`);
   }, 'Use whole-number animation times from 0–10,000 ms, border sizes from 0–10 px, valid icon choices, and six-digit hex colors such as #B5F36D.');
   command('clearQueue', noData, () => { service.alerts.clear(); log('Pending alert queue cleared'); });
   command('dismissAlert', noData, () => service.alerts.dismiss());

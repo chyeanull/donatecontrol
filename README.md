@@ -23,7 +23,7 @@ For development, use `npm run dev` instead of the build/start commands.
 
 ## Features
 
-- GoFundMe Pro / Classy, Givebutter, and DonorDrive integrations, plus a local demo. Consumer GoFundMe campaigns are not supported.
+- GoFundMe Pro / Classy, Givebutter, DonorDrive, and Movember integrations, plus a local demo. Consumer GoFundMe campaigns are not supported.
 - Donation alerts and a persistent fundraising thermometer that updates as donations arrive.
 - Automatic alerts or manual sending, with a saved donation list, editable names/messages, reset controls, and send counts.
 - Overlay themes, Google Fonts, colors, borders, corners, and donation icons.

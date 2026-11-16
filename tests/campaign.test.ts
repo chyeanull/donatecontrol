@@ -16,6 +16,48 @@ function setup(initial = structuredClone(defaults)) {
 }
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 describe('campaign orchestration', () => {
+  it('loads ten unsent demo donations once and preserves sample edits and sends through reconnect and reset', async () => {
+    vi.useFakeTimers();
+    const { state, service } = setup();
+    await service.connect(defaults.settings);
+    expect(state.donationHistory).toHaveLength(10);
+    expect(state.donationHistory.every((entry) => entry.donation.test && entry.message && entry.sentCount === 0)).toBe(true);
+    expect(new Set(state.donationHistory.map((entry) => entry.donation.id)).size).toBe(10);
+    expect(state.currentAlert).toMatchObject({ visible: false, donation: null, queued: 0 });
+    expect(state.campaign.raised).toBe(12500);
+    expect(state.campaign.percent).toBe(50);
+    const original = structuredClone(state.donationHistory);
+    await service.refresh();
+    await service.connect(defaults.settings);
+    expect(state.donationHistory).toEqual(original);
+    const entry = state.donationHistory[0];
+    service.editDonation({ entryId: entry.id, donorName: 'Edited demo donor', message: 'Edited demo message' });
+    service.sendDonation({ entryId: entry.id });
+    expect(state.currentAlert.donation).toMatchObject({ donorName: 'Edited demo donor', message: 'Edited demo message', test: true });
+    expect(state.donationHistory[0].sentCount).toBe(1);
+    const editedHistory = structuredClone(state.donationHistory);
+    await service.resetMock();
+    expect(state.donationHistory).toEqual(editedHistory);
+    expect(state.recentDonations).toHaveLength(10);
+    expect(state.currentAlert).toMatchObject({ visible: false, donation: null, queued: 0 });
+    await service.disconnect();
+  });
+
+  it('adds demo samples to older saved demo sessions without replacing their donations or totals', async () => {
+    vi.useFakeTimers();
+    const initial = structuredClone(defaults);
+    const existing = { id: 'mock-existing', donorName: 'Existing donor', amount: 25, currency: 'USD', anonymous: false, test: true, timestamp: '2026-10-01T12:00:00Z' };
+    initial.mockState.donations = [existing];
+    initial.mockState.campaign.raised = 12525;
+    const { state, service } = setup(initial);
+    await service.connect(defaults.settings);
+    expect(state.donationHistory).toHaveLength(11);
+    expect(state.mockState.donations).toContainEqual(existing);
+    expect(state.campaign.raised).toBe(12525);
+    expect(state.currentAlert.visible).toBe(false);
+    await service.disconnect();
+  });
+
   it('stops pending playback on a provider error without losing donation history or counting hidden alerts', async () => {
     vi.useFakeTimers();
     const { state, service } = setup();
@@ -79,7 +121,7 @@ describe('campaign orchestration', () => {
     expect(state.currentAlert.donation?.donorName).toBe('Rob');
     service.testAlert(); service.testAlert();
     expect(state.currentAlert.queued).toBe(2); expect(state.campaign.raised).toBe(12550);
-    expect(state.recentDonations).toHaveLength(1);
+    expect(state.recentDonations).toHaveLength(11);
     await service.disconnect(); expect(state.campaign.raised).toBe(12550); expect(state.currentAlert.visible).toBe(false);
   });
   it('does not replay held donations on reconnect or when switching back to automatic control', async () => {
@@ -95,7 +137,7 @@ describe('campaign orchestration', () => {
     const restarted = setup(structuredClone(state));
     await restarted.service.connect(defaults.settings);
     expect(restarted.state.currentAlert.visible).toBe(false);
-    expect(restarted.state.recentDonations).toHaveLength(1);
+    expect(restarted.state.recentDonations).toHaveLength(11);
     await restarted.service.disconnect();
   });
   it('rejects unsupported Pro campaigns while preserving the previous thermometer', async () => {
@@ -154,7 +196,7 @@ describe('campaign orchestration', () => {
     expect(state.currentAlert.queued).toBe(1);
     await service.resetMock();
     expect(state.campaign.raised).toBe(12500); expect(state.currentAlert.donation).toBeNull();
-    expect(state.recentDonations).toEqual([]);
+    expect(state.recentDonations).toHaveLength(10);
     await service.disconnect();
   });
   it('resends an already-alerted donation repeatedly in order without changing totals, history, or dedupe', async () => {
@@ -217,16 +259,16 @@ describe('campaign orchestration', () => {
     await service.addMockDonation({ donorName: 'Migrated donor', amount: 10 });
     expect(state.settings.alertsEnabled).toBe(true);
     expect(state.currentAlert.visible).toBe(!manual);
-    expect(state.donationHistory[0].sentCount).toBe(manual ? 0 : 1);
+    expect(state.donationHistory.at(-1)!.sentCount).toBe(manual ? 0 : 1);
     if (manual) {
-      service.sendDonation({ entryId: state.donationHistory[0].id });
+      service.sendDonation({ entryId: state.donationHistory.at(-1)!.id });
       expect(state.currentAlert.visible).toBe(true);
-      expect(state.donationHistory[0].sentCount).toBe(1);
+      expect(state.donationHistory.at(-1)!.sentCount).toBe(1);
     }
     service.alerts.stop();
     service.testAlert();
     expect(state.currentAlert.donation).toMatchObject({ test: true, donorName: 'Alex Morgan' });
-    expect(state.donationHistory).toHaveLength(1);
+    expect(state.donationHistory).toHaveLength(11);
     await service.disconnect();
   });
 

@@ -76,9 +76,9 @@ export const alertSoundSchema = z.object({
   file: z.string().regex(/^[a-f0-9-]{36}\.(mp3|wav|ogg)$/).nullable(), name: z.string().max(200),
   enabled: z.boolean(), volume: z.number().min(0).max(1),
 });
-export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf', 'cyberpunk', 'gta6']);
+export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf', 'cyberpunk', 'gta6', 'cs2']);
 export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
-export const overlayThemeNames: Record<OverlayTheme, string> = { classic: 'Custom', quest: 'Quest', bwf: 'BWF', cyberpunk: 'Cyberpunk', gta6: 'GTA VI' };
+export const overlayThemeNames: Record<OverlayTheme, string> = { classic: 'Custom', quest: 'Quest', bwf: 'BWF', cyberpunk: 'Cyberkid', gta6: 'Grandsteal', cs2: 'Counter-Strike 2' };
 export const overlayAnimationNames: Record<OverlayAnimation, string> = {
   'draw-left': 'Draw from left', 'rise-fade': 'Rise & fade', 'soft-zoom': 'Soft zoom',
   'slide-right': 'Slide from right', 'center-reveal': 'Center reveal',

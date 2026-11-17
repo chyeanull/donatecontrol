@@ -6,7 +6,7 @@ For full product requirements and workflow, read [agent-context.md](agent-contex
 
 The persistent `overlayAppearance` Replicant stores the selected theme, separate alert/thermometer animations, entrance/exit timings, Custom colors and frame controls, and the shared icon preferences. Operators edit drafts in **Your overlays**, then **Save Changes** validates and publishes them to both live graphics. Previews work without a provider, using labeled sample data; applying appearance never changes campaign totals or donation history.
 
-- Display names: **Custom**, **Quest**, **BWF**, **Cyberpunk**, **GTA VI**. Stored keys: `classic`, `quest`, `bwf`, `cyberpunk`, `gta6`. Keep `classic` for existing settings compatibility.
+- Display names: **Custom**, **Quest**, **BWF**, **Cyberkid**, **Grandsteal**, **Counter-Strike 2**. Stored keys: `classic`, `quest`, `bwf`, `cyberpunk`, `gta6`, `cs2`. Keep `classic`, `cyberpunk`, and `gta6` for existing settings compatibility; theme renames change display labels only.
 - Default theme: Custom. Default animation: Draw from left. `src/shared/appearance.ts` merges legacy shared-animation settings and missing optional fields with defaults.
 - Custom includes font/accent/background color pickers and hex inputs, a whole-pixel border from 0–10 px, rounded/straight corners, and 20 Google Fonts. The border uses the exact accent color at full opacity. Font, border size, and corners share a compact row without group headings; the font wraps above the other fields on very narrow screens. Zero border is borderless.
 - **Show icon** and the compact icon dropdown apply globally across all themes and both graphics. The custom dropdown shows symbols and names in both the trigger and all options, with a checkmark for the selection. It supports arrows, Home/End, typeahead, Enter/Space selection, Escape cancellation, Tab, outside-click dismissal, and touch. The menu is portaled above other controls and positioned within the viewport. It closes and disables while Show icon is off or controls are unavailable. They are stored within `customTheme` for compatibility. Choose Heart, Happy face, Gift, Praying hands, Giving hand, Handshake, Star, Ribbon, Coin, or Sprout. Hiding the icon removes its layout space.
@@ -29,14 +29,20 @@ BWF references checked October 11, 2026:
 
 The guide specifies primary green `#47763B`, white `#FFFFFF`, charcoal `#373A36`, tan `#F0EFDD`; secondary navy `#021F4D` and green `#6ABF4B`. The implemented theme uses tan surfaces, green accents, charcoal text, navy headings, and Source Sans Pro regular/bold with Arial fallback. Foundation logos are not recreated. Dashboard typography is independent of overlay themes.
 
-## Cyberpunk and GTA VI
+## Cyberkid and Grandsteal
 
 Visual references inspected November 16, 2026: [Cyberpunk official site](https://www.cyberpunk.net/us/en/) and [GTA VI official site](https://www.rockstargames.com/VI). These themes use original CSS treatments rather than game logos, screenshots, or downloaded artwork.
 
-- **Cyberpunk:** electric yellow `#fcee0a`, ink `#0b1620`, cyan `#00e6f0`, cut-corner panels, square progress track, and condensed Rajdhani headings. The clipped backing is a pseudo-element so it does not override the entrance/exit clip paths or clip donor text.
-- **GTA VI:** violet `#21182f`, warm cream `#fff5e9`, pink `#ff9fbf`, peach `#ffc18a`, a sunset progress fill, and Oswald headings. Source Sans Pro keeps body text readable in both themes.
+- **Cyberkid:** electric yellow `#fcee0a`, ink `#0b1620`, cyan `#00e6f0`, cut-corner panels, square progress track, and condensed Rajdhani headings. The clipped backing is a pseudo-element so it does not override the entrance/exit clip paths or clip donor text.
+- **Grandsteal:** violet `#21182f`, warm cream `#fff5e9`, pink `#ff9fbf`, peach `#ffc18a`, a sunset progress fill, and Oswald headings. Source Sans Pro keeps body text readable in both themes.
 
 Rajdhani and Oswald load from Google Fonts using the shared reference-counted loader, with local sans-serif fallbacks; no new font assets are bundled. Rajdhani is preset-only and does not alter Custom's 20-font dropdown. Preset appearance remains fixed while global icon visibility/selection and each graphic's animation/timing remain configurable. Preview samples, live overlays, and saved appearance share the same styles and theme keys.
+
+## Counter-Strike 2
+
+The `cs2` preset uses charcoal `#202326`, warm white `#f4f1e9`, Counter-Strike orange `#f4a124`, square frames, and Roboto Condensed headings from Google Fonts. The image is a Catalana chicken rendered from the game model, sourced from [CS2Locker](https://cs2locker.com/pets); see [asset attribution](../src/client/shared/images/ATTRIBUTION.md). It is bundled locally through Vite for reliable preview and OBS rendering.
+
+The chicken appears in the theme sample and both graphics, with dedicated space alongside the text. It remains visible independently of the optional global donation icon; normal icon controls, separate animations, timing, and long-message fitting still apply. The thermometer enters once and stays on screen.
 
 ## Panels and testing
 

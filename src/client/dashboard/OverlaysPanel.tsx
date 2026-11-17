@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Thermometer } from '../shared/Graphics';
 import { useReplicant } from '../shared/nodecg';
-import { DEFAULT_ANIMATION_IN_MS, DEFAULT_ANIMATION_OUT_MS, MAX_ANIMATION_MS, animationMsSchema, customBorderWidthSchema, defaultClassicColors, emptyCampaign, overlayAnimationNames, type DonationAlert, type OverlayTheme, type OverlayAnimation } from '../../shared/models';
+import { DEFAULT_ANIMATION_IN_MS, DEFAULT_ANIMATION_OUT_MS, MAX_ANIMATION_MS, animationMsSchema, customBorderWidthSchema, defaultClassicColors, emptyCampaign, overlayAnimationNames, overlayThemeNames, type DonationAlert, type OverlayTheme, type OverlayAnimation } from '../../shared/models';
 import { parseHexColor, resolveOverlayAppearance } from '../../shared/appearance';
 import { customThemeStyle, overlayIcon } from '../shared/appearance';
 import { DonationIcon } from '../shared/DonationIcon';
+import { CounterStrikeChicken } from '../shared/CounterStrikeChicken';
 import { PanelLayout, SectionTitle, Icon, useControls } from './PanelLayout';
 import { OverlayCard } from './OverlayCard';
 import { AlertPreview } from './AlertPreview';
@@ -19,8 +20,9 @@ const themes = [
   { id: 'classic', name: 'Custom', description: null },
   { id: 'quest', name: 'Quest', description: 'Parchment lettering, antique gold, and an ornate frame for your campaign.' },
   { id: 'bwf', name: 'BWF', description: 'Foundation green, warm tan, and Source Sans Pro, drawn from the BWF brand guide.' },
-  { id: 'cyberpunk', name: 'Cyberpunk', description: 'Electric yellow, cyan details, and angular frames inspired by Night City.' },
-  { id: 'gta6', name: 'GTA VI', description: 'Sunset pink, warm cream, and bold lettering inspired by Vice City.' },
+  { id: 'cyberpunk', name: overlayThemeNames.cyberpunk, description: 'Electric yellow, cyan details, and angular frames inspired by Night City.' },
+  { id: 'gta6', name: overlayThemeNames.gta6, description: 'Sunset pink, warm cream, and bold lettering inspired by Vice City.' },
+  { id: 'cs2', name: overlayThemeNames.cs2, description: 'Charcoal, Counter-Strike orange, and a familiar chicken beside every donation.' },
 ] as const;
 const animationDescriptions: Record<OverlayAnimation, string> = {
   'draw-left': 'The frame draws from left to right, followed by the title, amounts, and progress bar.',
@@ -113,7 +115,7 @@ export function OverlaysPanel() {
       <section className="card headed-card theme-panel">
         <SectionTitle step="01" title="Overlay themes"/>
         <label htmlFor="overlay-theme">Theme<select id="overlay-theme" value={selected} disabled={disabled || testing} onChange={(event) => setSelected(event.target.value as OverlayTheme)}>{themes.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <div className="theme-art selected-theme-preview" data-theme={selected} style={customThemeStyle(selected, classicColors, customTheme)} role="img" aria-label={`${theme.name} theme sample`}><span className="theme-art-title">{sampleIcon && <DonationIcon name={sampleIcon}/>}Together, we can.</span><span className="theme-art-amount">{theme.name}<span> theme preview</span></span><span className="theme-art-track"><span/></span></div>
+        <div className="theme-art selected-theme-preview" data-theme={selected} style={customThemeStyle(selected, classicColors, customTheme)} role="img" aria-label={`${theme.name} theme sample`}>{selected === 'cs2' && <CounterStrikeChicken/>}<span className="theme-art-title">{sampleIcon && <DonationIcon name={sampleIcon}/>}Together, we can.</span><span className="theme-art-amount">{theme.name}<span> theme preview</span></span><span className="theme-art-track"><span/></span></div>
         {theme.description && <p className="appearance-description">{theme.description}</p>}
         {selected === 'classic' && <><ClassicColorControls value={colorInputs} preview={classicColors} disabled={disabled || testing} onChange={setColorInputs}/><CustomThemeControls value={customTheme} borderInput={borderInput} borderValid={borderValid} disabled={disabled || testing} onChange={setCustomOptions} onBorderChange={setBorderInput}/></>}
         <OverlayIconControls value={customTheme} disabled={disabled || testing} onChange={setCustomOptions}/>

@@ -5,7 +5,7 @@ import { Icon } from './PanelLayout';
 const fundraiserNames = { participants: 'Participant', teams: 'Team', events: 'Event' } as const;
 
 export function CampaignHistory({ disabled, onSelect }: { disabled: boolean; onSelect: (entry: CampaignConnection) => void }) {
-  const history = useReplicant('campaignHistory');
+  const history = useReplicant('campaignHistory').filter((entry) => entry.provider !== 'mock');
   return <section className="card headed-card campaign-history" aria-labelledby="campaign-history-heading">
     <div className="section-heading"><h2 id="campaign-history-heading">Connection history</h2><Icon name="activity"/></div>
     <p className="section-description">Choose a saved campaign to fill in the connection form, then click Connect.</p>

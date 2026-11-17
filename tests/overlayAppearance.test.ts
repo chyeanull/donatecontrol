@@ -127,7 +127,7 @@ describe('overlay appearance compatibility and colors', () => {
     expect(customThemeStyle('classic', colors, defaultCustomTheme)).toMatchObject({ '--graphic-border-width': '1px', '--graphic-radius': '18px' });
     expect(overlayIcon(custom)).toBe('gift');
     expect(overlayIcon({ ...custom, iconEnabled: false })).toBeNull();
-    for (const theme of ['quest', 'bwf', 'cyberpunk', 'gta6'] as const) {
+    for (const theme of ['quest', 'bwf', 'cyberpunk', 'gta6', 'cs2'] as const) {
       expect(customThemeStyle(theme, colors, custom)).toBeUndefined();
       expect(overlayIcon({ ...custom, iconEnabled: false })).toBeNull();
     }

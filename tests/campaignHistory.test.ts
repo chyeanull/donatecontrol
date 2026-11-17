@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CampaignService, type StateStore } from '../src/extension/services/campaignService';
 import { defaults, schemas, type ProviderConfig, type Replicants } from '../src/shared/models';
-import { MockProvider } from '../src/extension/providers/MockProvider';
 import { GoFundMeProProvider } from '../src/extension/providers/GoFundMeProProvider';
 import { DonorDriveProvider } from '../src/extension/providers/DonorDriveProvider';
 import { GivebutterProvider } from '../src/extension/providers/GivebutterProvider';
@@ -21,17 +20,25 @@ afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 describe('saved campaign connections', () => {
   it('records successful connections once, leaves dates unchanged on polling, and survives restart', async () => {
     vi.useFakeTimers();
+    vi.spyOn(GoFundMeProProvider.prototype, 'connect').mockResolvedValue();
+    vi.spyOn(GoFundMeProProvider.prototype, 'getCampaign').mockResolvedValue({ ...defaults.mockState.campaign, id: '123', title: 'Saved campaign', connected: true });
+    vi.spyOn(GoFundMeProProvider.prototype, 'getRecentDonations').mockResolvedValue([]);
+    const settings = { ...defaults.settings, provider: 'gofundme-pro' as const, campaignId: '123' };
     const { state, service } = setup();
-    await service.connect(defaults.settings);
+    await service.connect(settings);
     const saved = structuredClone(state.campaignHistory);
-    expect(saved).toEqual([expect.objectContaining({ key: 'mock:demo', title: 'Charity Stream', provider: 'mock' })]);
+    expect(saved).toEqual([expect.objectContaining({ key: 'gofundme-pro:123', title: 'Saved campaign', provider: 'gofundme-pro' })]);
     vi.setSystemTime(Date.now() + 1000);
+    await service.refresh();
+    expect(state.campaignHistory).toEqual(saved);
+    await service.disconnect();
+    await service.connect(defaults.settings);
     await service.refresh();
     expect(state.campaignHistory).toEqual(saved);
     await service.disconnect();
     const restarted = setup(structuredClone(state));
     expect(restarted.state.campaignHistory).toEqual(saved);
-    await restarted.service.connect(defaults.settings);
+    await restarted.service.connect(settings);
     expect(restarted.state.campaignHistory).toHaveLength(1);
     expect(restarted.state.campaignHistory[0].lastConnectedAt).not.toBe(saved[0].lastConnectedAt);
     await restarted.service.disconnect();
@@ -90,16 +97,19 @@ describe('saved campaign connections', () => {
 
   it('does not save failed or cancelled connections, including a failure after loading campaign details', async () => {
     vi.useFakeTimers();
-    const donations = vi.spyOn(MockProvider.prototype, 'getRecentDonations').mockRejectedValueOnce(new Error('Donations unavailable'));
+    vi.spyOn(GoFundMeProProvider.prototype, 'connect').mockResolvedValue();
+    vi.spyOn(GoFundMeProProvider.prototype, 'getCampaign').mockResolvedValue({ ...defaults.mockState.campaign, id: '123', connected: true });
+    const donations = vi.spyOn(GoFundMeProProvider.prototype, 'getRecentDonations').mockRejectedValueOnce(new Error('Donations unavailable'));
+    const settings = { ...defaults.settings, provider: 'gofundme-pro' as const, campaignId: '123' };
     const { state, service } = setup();
-    await expect(service.connect(defaults.settings)).rejects.toThrow('Donations unavailable');
+    await expect(service.connect(settings)).rejects.toThrow('Donations unavailable');
     expect(state.campaignHistory).toEqual([]);
     await service.disconnect();
     let release!: () => void;
     let started!: () => void;
     const loading = new Promise<void>((resolve) => { started = resolve; });
     donations.mockImplementationOnce(() => new Promise((resolve) => { release = () => resolve([]); started(); }));
-    const pending = service.connect(defaults.settings);
+    const pending = service.connect(settings);
     await loading;
     await service.disconnect();
     release(); await pending;

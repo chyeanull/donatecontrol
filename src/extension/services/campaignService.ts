@@ -85,9 +85,9 @@ export class CampaignService {
       this.store.set('campaign', settings.provider === 'movember' ? this.withMovemberGoal(campaign) : campaign);
       this.store.set('recentDonations', result.recent);
       const { entries, added } = this.history.capture(donations, key, campaign.title);
-      // Only complete, successful connections enter history. Polling does not
+      // Only complete, successful non-demo connections enter history. Polling does not
       // reorder the list or replace the time the producer last connected.
-      if (baseline) {
+      if (baseline && settings.provider !== 'mock') {
         const historyKey = settings.provider === 'gofundme-pro' ? `gofundme-pro:${campaign.id}` : key;
         this.store.set('campaignHistory', [{
           key: historyKey, title: campaign.title, provider: settings.provider,

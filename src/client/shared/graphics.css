@@ -5,6 +5,7 @@
 [data-theme="bwf"] { --graphic-accent: #47763b; --graphic-ink: #373a36; --graphic-muted: #51564d; --graphic-surface: #f0efdd; --graphic-border: #47763b; --graphic-track: #d4d9c9; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: "Source Sans Pro", Arial, sans-serif; --graphic-radius: 2px; --graphic-glow: none; --graphic-tint: #47763b18; }
 [data-theme="cyberpunk"] { --graphic-accent: #0b1620; --graphic-ink: #0b1620; --graphic-muted: #35432a; --graphic-surface: #fcee0a; --graphic-border: #0b1620; --graphic-track: #c4ba17; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: Rajdhani, "Arial Narrow", Arial, sans-serif; --graphic-radius: 0px; --graphic-track-radius: 0px; --graphic-glow: none; --graphic-tint: #0b1620; }
 [data-theme="gta6"] { --graphic-accent: #ff9fbf; --graphic-ink: #fff5e9; --graphic-muted: #d6bbd3; --graphic-surface: #21182f; --graphic-border: #a96594; --graphic-track: #52334f; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: Oswald, "Arial Narrow", Arial, sans-serif; --graphic-radius: 12px; --graphic-glow: none; --graphic-tint: #51324e; }
+[data-theme="cs2"] { --graphic-accent: #f4a124; --graphic-ink: #f4f1e9; --graphic-muted: #c9c5bd; --graphic-surface: #202326; --graphic-border: #525453; --graphic-track: #444645; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: "Roboto Condensed", "Arial Narrow", Arial, sans-serif; --graphic-radius: 2px; --graphic-track-radius: 0px; --graphic-glow: none; --graphic-tint: #34312a; }
 .thermometer, .donation-card { box-sizing: border-box; color: var(--graphic-ink); font-family: var(--graphic-font); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; background: var(--graphic-surface); border: var(--graphic-border-width, 1px) solid var(--graphic-border); border-radius: var(--graphic-radius); box-shadow: var(--graphic-glow); }
 .thermometer { width: 100%; height: 100%; padding: 20px 28px; display: flex; flex-direction: column; justify-content: space-between; }
 .thermo-heading { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -72,6 +73,33 @@
 [data-theme="gta6"] .alert-donor { font-size: 28px; line-height: 1.4; color: #fff5e9; }
 [data-theme="gta6"] .alert-eyebrow { font-family: var(--graphic-font); color: #ffd1a4; }
 [data-theme="gta6"] .alert-amount strong { color: #ffb9d0; }
+
+/* The chicken is theme artwork, separate from the shared donation icon. */
+:is(.thermometer, .donation-card, .theme-art)[data-theme="cs2"] { position: relative; border-top: 4px solid var(--graphic-accent); }
+.cs2-chicken { position: absolute; left: 12px; bottom: 10px; width: 114px; height: calc(100% - 20px); max-height: 152px; object-fit: cover; object-position: 54% center; pointer-events: none; user-select: none; }
+.thermometer[data-theme="cs2"] { padding-left: 142px; }
+.donation-card[data-theme="cs2"] { padding: 18px 24px 18px 142px; min-height: 146px; }
+[data-theme="cs2"] :is(.thermo-title, .alert-donor, .theme-art-title) { text-transform: uppercase; letter-spacing: .025em; }
+[data-theme="cs2"] :is(.thermo-amounts strong, .thermo-percent, .alert-amount strong, .theme-art-amount) { font-family: var(--graphic-title-font); font-weight: 700; }
+[data-theme="cs2"] .thermo-tag { color: var(--graphic-accent); }
+[data-theme="cs2"] .thermo-track { height: 10px; }
+.donation-card[data-theme="cs2"].has-icon { grid-template-columns: 34px minmax(0, 1fr); column-gap: 12px; }
+.donation-card[data-theme="cs2"] > .alert-symbol { width: 34px; height: 34px; padding: 6px; border: 1px solid var(--graphic-border); border-radius: 2px; }
+[data-theme="cs2"] .alert-donor { font-size: 26px; line-height: 1.35; }
+[data-theme="cs2"] .alert-message { font-size: 20px; line-height: 1.5; }
+.theme-art[data-theme="cs2"] { padding-right: 124px; }
+.theme-art[data-theme="cs2"] .cs2-chicken { left: auto; right: 12px; width: 94px; max-height: 124px; }
+.mini-thermo .thermometer[data-theme="cs2"] { padding-left: 86px; }
+.mini-thermo [data-theme="cs2"] .cs2-chicken { left: 6px; bottom: 8px; width: 76px; max-height: 106px; }
+.mini-thermo [data-theme="cs2"] .thermo-amounts { gap: 8px; }
+.mini-thermo [data-theme="cs2"] .thermo-amounts span { display: block; font-size: 10px; }
+@media (max-width: 480px) {
+  .mini-thermo [data-theme="cs2"] .thermo-amounts strong { font-size: 18px; }
+  .mini-thermo [data-theme="cs2"] .thermo-goal strong { font-size: 13px; }
+  .mini-thermo [data-theme="cs2"] .thermo-percent { font-size: 12px; min-width: 28px; }
+  .theme-art[data-theme="cs2"] { padding-right: 92px; }
+  .theme-art[data-theme="cs2"] .cs2-chicken { right: 4px; width: 84px; max-height: 112px; }
+}
 @media (max-width: 650px) { .thermo-tag { display: none; } }
 @media (prefers-reduced-motion: reduce) { .thermo-fill { transition: none; } }
 

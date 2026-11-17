@@ -4,6 +4,18 @@ Donation alerts and a fundraising thermometer for OBS, with a local NodeCG contr
 
 Made by [Robert Hilsky](https://roberthilsky.com).
 
+## Overlay examples
+
+Custom theme with sample data.
+
+**Fundraising thermometer**
+
+![Custom fundraising thermometer showing $12,500 raised toward a $25,000 goal](docs/screenshots/custom-thermometer.png)
+
+**Donation alert**
+
+![Custom donation alert showing a sample $25 donation and message](docs/screenshots/custom-alert.png)
+
 ## Install
 
 Requires **Node.js 22.12+** and npm.

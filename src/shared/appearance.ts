@@ -1,4 +1,5 @@
 import { DEFAULT_ANIMATION_IN_MS, DEFAULT_ANIMATION_OUT_MS, defaultClassicColors, defaultCustomTheme, type Replicants } from './models';
+import { mustacheRiderMotion } from './mustacheRider';
 
 export function resolveOverlayAppearance(value: Replicants['overlayAppearance'], previous?: Replicants['overlayAppearance']) {
   const legacyAnimation = value.animation ?? previous?.animation ?? 'draw-left';
@@ -19,4 +20,16 @@ export function resolveOverlayAppearance(value: Replicants['overlayAppearance'],
 export function parseHexColor(value: string): string | undefined {
   const hex = value.trim().replace(/^#/, '');
   return /^[0-9a-f]{6}$/i.test(hex) ? `#${hex.toLowerCase()}` : undefined;
+}
+
+export function resolveAlertPlayback(value: Replicants['overlayAppearance'], durationSeconds: number) {
+  const appearance = resolveOverlayAppearance(value);
+  const custom = appearance.theme === 'mustacherider';
+  return {
+    theme: appearance.theme,
+    animation: appearance.alertAnimation,
+    animationInMs: custom ? mustacheRiderMotion.alertInMs : appearance.animationInMs,
+    animationOutMs: custom ? mustacheRiderMotion.alertOutMs : appearance.animationOutMs,
+    holdMs: custom ? mustacheRiderMotion.holdMs : Math.round(durationSeconds * 1000),
+  };
 }

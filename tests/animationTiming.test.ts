@@ -44,14 +44,14 @@ describe('animation time around the fully-visible alert duration', () => {
     vi.advanceTimersByTime(400);
     state.overlayAppearance = { ...state.overlayAppearance, alertAnimation: nextAnimation, thermometerAnimation: 'soft-zoom', animationInMs: 0, animationOutMs: 250 };
     service.saveSettings({ alertDurationSeconds: 2, pollingIntervalSeconds: 15 });
-    expect(state.currentAlert.playback).toEqual({ animation: firstAnimation, animationInMs: 1200, animationOutMs: 900 });
+    expect(state.currentAlert.playback).toEqual({ theme: 'classic', animation: firstAnimation, animationInMs: 1200, animationOutMs: 900, holdMs: 3000 });
     vi.advanceTimersByTime(3800);
     expect(state.currentAlert.visible).toBe(false);
     vi.advanceTimersByTime(899);
     expect(state.currentAlert.donation!.id).toBe(firstId);
     vi.advanceTimersByTime(1);
     expect(state.currentAlert.donation!.id).not.toBe(firstId);
-    expect(state.currentAlert.playback).toEqual({ animation: nextAnimation, animationInMs: 0, animationOutMs: 250 });
+    expect(state.currentAlert.playback).toEqual({ theme: 'classic', animation: nextAnimation, animationInMs: 0, animationOutMs: 250, holdMs: 2000 });
     vi.advanceTimersByTime(1999); expect(state.currentAlert.visible).toBe(true);
     vi.advanceTimersByTime(1); expect(state.currentAlert.visible).toBe(false);
     vi.advanceTimersByTime(250); expect(state.currentAlert.donation).toBeNull();
@@ -84,5 +84,36 @@ describe('animation time around the fully-visible alert duration', () => {
     vi.advanceTimersByTime(1); expect(alert.donation?.id).toBe('two');
     queue.stop(); const calls = publish.mock.calls.length;
     vi.runAllTimers(); expect(publish).toHaveBeenCalledTimes(calls); expect(alert.donation).toBeNull();
+  });
+
+  it('finishes printing, holds for ten seconds, and exits before starting the next receipt or theme', () => {
+    vi.useFakeTimers();
+    const state = structuredClone(defaults);
+    const store: StateStore = {
+      get: <K extends keyof Replicants>(key: K) => structuredClone(state[key]),
+      set: <K extends keyof Replicants>(key: K, value: Replicants[K]) => { schemas[key].parse(value); state[key] = structuredClone(value); },
+    };
+    state.overlayAppearance = { ...state.overlayAppearance, theme: 'mustacherider', animationInMs: 0, animationOutMs: 0 };
+    state.settings.alertDurationSeconds = 2;
+    const service = new CampaignService(store, () => {}, () => ({}));
+    service.testAlert(); service.testAlert();
+    const first = state.currentAlert.donation!.id;
+    expect(state.currentAlert.playback).toMatchObject({ theme: 'mustacherider', animationInMs: 3600, holdMs: 10000, animationOutMs: 1400 });
+    vi.advanceTimersByTime(13599);
+    expect(state.currentAlert.visible).toBe(true);
+    vi.advanceTimersByTime(1); expect(state.currentAlert.visible).toBe(false);
+    vi.advanceTimersByTime(1399); expect(state.currentAlert.donation!.id).toBe(first);
+    vi.advanceTimersByTime(1);
+    expect(state.currentAlert.donation!.id).not.toBe(first); expect(state.currentAlert.visible).toBe(true);
+    // Editing the selected theme during the next receipt cannot truncate its hold/exit.
+    state.overlayAppearance = { ...state.overlayAppearance, theme: 'classic', animationInMs: 500, animationOutMs: 400 };
+    service.testAlert();
+    expect(state.currentAlert.playback?.theme).toBe('mustacherider');
+    vi.advanceTimersByTime(15000);
+    expect(state.currentAlert.playback).toMatchObject({ theme: 'classic', animationInMs: 500, holdMs: 2000, animationOutMs: 400 });
+    state.overlayAppearance = { ...state.overlayAppearance, theme: 'mustacherider' };
+    expect(state.currentAlert.playback?.theme).toBe('classic');
+    vi.advanceTimersByTime(2900); expect(state.currentAlert.donation).toBeNull();
+    service.alerts.stop();
   });
 });

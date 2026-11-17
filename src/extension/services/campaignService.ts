@@ -13,7 +13,7 @@ import { detectDonations } from './donationService';
 import { DonationHistory } from './donationHistory';
 import { PollingService } from './pollingService';
 import type { ProCredentials } from './credentialStore';
-import { resolveOverlayAppearance } from '../../shared/appearance';
+import { resolveAlertPlayback } from '../../shared/appearance';
 
 export interface StateStore {
   get<K extends keyof Replicants>(key: K): Replicants[K];
@@ -41,8 +41,7 @@ export class CampaignService {
     this.history.capture(store.get('mockState').donations, 'mock:demo', store.get('mockState').campaign.title);
     this.alerts = new AlertQueue((value) => store.set('currentAlert', value), () => store.get('settings').alertDurationSeconds,
       log, (entryId) => this.history.markSent(entryId), () => {
-        const { alertAnimation, animationInMs, animationOutMs } = resolveOverlayAppearance(store.get('overlayAppearance'));
-        return { animation: alertAnimation, animationInMs, animationOutMs };
+        return resolveAlertPlayback(store.get('overlayAppearance'), store.get('settings').alertDurationSeconds);
       });
   }
   async connect(settings: SettingsState) {

@@ -31,7 +31,7 @@ export class AlertQueue {
     this.visible = this.current !== null;
     this.emit();
     if (this.current?.entryId) this.onStart(this.current.entryId);
-    if (this.current) this.timer = setTimeout(() => this.dismiss(), this.playback.animationInMs + this.duration() * 1000);
+    if (this.current) this.timer = setTimeout(() => this.dismiss(), this.playback.animationInMs + (this.playback.holdMs ?? this.duration() * 1000));
   }
   dismiss() {
     if (!this.current || !this.visible) return;

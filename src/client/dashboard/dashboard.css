@@ -117,6 +117,8 @@ h3 { font-size: 20px; line-height: 1.2; }
 .preview-label { position: absolute; left: 16px; top: 12px; font: 9px var(--mono); letter-spacing: 1px; color: var(--muted); }
 .sample-label { position: absolute; bottom: 12px; font: 9px var(--mono); color: var(--muted); letter-spacing: .5px; }
 .mini-thermo { width: calc(100% - 40px); height: 130px; }
+.mini-thermo[data-theme="mustacherider"] { height: 190px; }
+.mini-thermo .thermometer[data-theme="mustacherider"] { padding: 0; }
 .mini-thermo .thermometer { padding: 16px; }
 .mini-thermo .graphic-mark { width: 18px; height: 18px; }
 .mini-thermo .thermo-title { font-size: 13px; }

@@ -7,6 +7,6 @@ export function OverlayIconControls({ value, disabled, onChange }: {
   return <div className="overlay-icon-controls">
     <label className="toggle-row custom-icon-toggle"><span><strong>Show icon</strong></span><input type="checkbox" role="switch" checked={value.iconEnabled} disabled={disabled} onChange={(event) => onChange({ ...value, iconEnabled: event.target.checked })}/></label>
     <DonationIconSelect value={value.icon} disabled={disabled || !value.iconEnabled} describedBy="overlay-icon-help" onChange={(icon) => onChange({ ...value, icon })}/>
-    <p id="overlay-icon-help" className="fine-print">The icon and Show icon setting are shared by every theme and both overlays.</p>
+    <p id="overlay-icon-help" className="fine-print">The icon and Show icon setting are shared by every theme except MustacheRider, which uses its own artwork.</p>
   </div>;
 }

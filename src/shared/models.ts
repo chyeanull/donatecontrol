@@ -8,7 +8,12 @@ export const MAX_ANIMATION_MS = 10000;
 export const animationMsSchema = z.number().int().min(0).max(MAX_ANIMATION_MS);
 export const overlayAnimationSchema = z.enum(['draw-left', 'rise-fade', 'soft-zoom', 'slide-right', 'center-reveal']);
 export type OverlayAnimation = z.infer<typeof overlayAnimationSchema>;
-export const alertPlaybackSchema = z.object({ animation: overlayAnimationSchema, animationInMs: animationMsSchema, animationOutMs: animationMsSchema });
+export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf', 'cyberpunk', 'gta6', 'cs2', 'mustacherider']);
+export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
+// Optional for older clients; new playback captures its theme and hold duration
+// so appearance edits cannot switch canvas/motion halfway through an alert.
+export const alertPlaybackSchema = z.object({ animation: overlayAnimationSchema, animationInMs: animationMsSchema, animationOutMs: animationMsSchema,
+  theme: overlayThemeSchema.optional(), holdMs: z.number().int().min(2000).max(30000).optional() });
 export type AlertPlayback = z.infer<typeof alertPlaybackSchema>;
 export const defaultAlertPlayback: AlertPlayback = { animation: 'draw-left', animationInMs: DEFAULT_ANIMATION_IN_MS, animationOutMs: DEFAULT_ANIMATION_OUT_MS };
 const money = z.number().finite().min(0).max(1e12);
@@ -76,9 +81,7 @@ export const alertSoundSchema = z.object({
   file: z.string().regex(/^[a-f0-9-]{36}\.(mp3|wav|ogg)$/).nullable(), name: z.string().max(200),
   enabled: z.boolean(), volume: z.number().min(0).max(1),
 });
-export const overlayThemeSchema = z.enum(['classic', 'quest', 'bwf', 'cyberpunk', 'gta6', 'cs2']);
-export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
-export const overlayThemeNames: Record<OverlayTheme, string> = { classic: 'Custom', quest: 'Quest', bwf: 'BWF', cyberpunk: 'Cyberkid', gta6: 'Grandsteal', cs2: 'Counter-Strike 2' };
+export const overlayThemeNames: Record<OverlayTheme, string> = { classic: 'Custom', quest: 'Quest', bwf: 'BWF', cyberpunk: 'Cyberkid', gta6: 'Grandsteal', cs2: 'Counter-Strike 2', mustacherider: 'MustacheRider' };
 export const overlayAnimationNames: Record<OverlayAnimation, string> = {
   'draw-left': 'Draw from left', 'rise-fade': 'Rise & fade', 'soft-zoom': 'Soft zoom',
   'slide-right': 'Slide from right', 'center-reveal': 'Center reveal',

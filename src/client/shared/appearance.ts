@@ -7,6 +7,7 @@ export function overlayGoogleFont(theme: OverlayTheme, custom?: CustomTheme): Gr
   if (theme === 'cyberpunk') return 'Rajdhani';
   if (theme === 'gta6') return 'Oswald';
   if (theme === 'cs2') return 'Roboto Condensed';
+  if (theme === 'mustacherider') return 'Rubik Spray Paint';
   return undefined;
 }
 

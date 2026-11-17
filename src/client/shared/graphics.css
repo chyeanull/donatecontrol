@@ -1,5 +1,5 @@
 @import './fonts.css';
-:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); }
+:root { --ease-out: cubic-bezier(0.23, 1, 0.32, 1); --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); }
 [data-theme] { --graphic-accent: #b5f36d; --graphic-ink: #f8faf5; --graphic-muted: #b4bdb4; --graphic-surface: #141a19f7; --graphic-border: #637f51; --graphic-track: #333e35; --graphic-font: "Segoe UI", Arial, sans-serif; --graphic-title-font: "Segoe UI", Arial, sans-serif; --graphic-radius: 18px; --graphic-glow: 0 6px 18px #0002; --graphic-tint: #b5f36d16; }
 [data-theme="quest"] { --graphic-accent: #e6b84e; --graphic-ink: #f5e6d3; --graphic-muted: #bfa98a; --graphic-surface: #2c1a10; --graphic-border: #ca8a04; --graphic-track: #5c3d2e; --graphic-font: Spectral, Georgia, serif; --graphic-title-font: Cinzel, Georgia, serif; --graphic-radius: 4px; --graphic-glow: inset 0 0 0 4px #2c1a10, inset 0 0 0 5px #ca8a0440, 0 4px 16px #ca8a0420; --graphic-tint: #ca8a0420; }
 [data-theme="bwf"] { --graphic-accent: #47763b; --graphic-ink: #373a36; --graphic-muted: #51564d; --graphic-surface: #f0efdd; --graphic-border: #47763b; --graphic-track: #d4d9c9; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: "Source Sans Pro", Arial, sans-serif; --graphic-radius: 2px; --graphic-glow: none; --graphic-tint: #47763b18; }
@@ -122,3 +122,11 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay-motion[data-animation], .overlay-motion[data-animation] > div { transform: none; clip-path: none; transition-property: opacity; transition-timing-function: ease; transition-delay: 0ms; }
 }
+
+/* MustacheRider keeps the supplied illustration's proportions on any OBS canvas. */
+[data-theme="mustacherider"] { --graphic-accent: #7a4b0c; --graphic-ink: #623807; --graphic-muted: #845821; --graphic-surface: #f2d094; --graphic-border: #7a4b0c; --graphic-tint: #e8bc73; --graphic-font: "Source Sans Pro", Arial, sans-serif; --graphic-title-font: "Rubik Spray Paint", "Source Sans Pro", sans-serif; --graphic-radius: 16px; --graphic-glow: none; }
+.thermometer[data-theme="mustacherider"], .theme-art[data-theme="mustacherider"] { display: grid; place-items: center; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.mustacherider-art { display: block; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+.mustacherider-labels { fill: #7a4b0c; font: 400 28px "Rubik Spray Paint", "Source Sans Pro", sans-serif; font-variant-numeric: normal; }
+.mustacherider-fill-mask { transition: width 500ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .mustacherider-fill-mask { transition: none; } }

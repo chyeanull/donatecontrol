@@ -93,6 +93,23 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 10000
+        },
+        "theme": {
+          "type": "string",
+          "enum": [
+            "classic",
+            "quest",
+            "bwf",
+            "cyberpunk",
+            "gta6",
+            "cs2",
+            "mustacherider"
+          ]
+        },
+        "holdMs": {
+          "type": "integer",
+          "minimum": 2000,
+          "maximum": 30000
         }
       },
       "required": [

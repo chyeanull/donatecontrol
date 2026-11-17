@@ -11,7 +11,8 @@ export function useGoogleFont(font: GraphicFont | undefined) {
     if (!entry) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@400;700&display=swap`;
+      const weights = font === 'Rubik Spray Paint' ? '400' : '400;700';
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font)}:wght@${weights}&display=swap`;
       link.dataset.overlayFont = font;
       document.head.append(link);
       entry = { link, users: 0 };

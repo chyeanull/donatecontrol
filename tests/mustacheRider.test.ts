@@ -1,5 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { mustacheRiderScale } from '../src/shared/mustacheRider';
+import { mustacheRiderHoldMs, mustacheRiderScale } from '../src/shared/mustacheRider';
+import { resolveAlertPlayback } from '../src/shared/appearance';
+import { defaults, alertPlaybackSchema } from '../src/shared/models';
+
+describe('MustacheRider reading time', () => {
+  it('keeps short receipts at ten seconds and gives longer messages more reading time', () => {
+    expect(mustacheRiderHoldMs()).toBe(10000);
+    expect(mustacheRiderHoldMs('Thank you for making a difference!')).toBe(10000);
+    const long = 'Thank you for making a difference! '.repeat(20);
+    expect(mustacheRiderHoldMs(long)).toBeGreaterThanOrEqual(20000);
+    expect(mustacheRiderHoldMs(long.repeat(2))).toBeGreaterThan(mustacheRiderHoldMs(long));
+    const appearance = { ...defaults.overlayAppearance, theme: 'mustacherider' as const };
+    expect(resolveAlertPlayback(appearance, 2, long).holdMs).toBe(mustacheRiderHoldMs(long));
+    expect(resolveAlertPlayback(defaults.overlayAppearance, 3, long).holdMs).toBe(3000);
+  });
+
+  it('budgets for explicit line breaks and wide text, including the longest allowed messages', () => {
+    expect(mustacheRiderHoldMs('Thank you!\n'.repeat(25))).toBeGreaterThan(30000);
+    expect(mustacheRiderHoldMs('支持'.repeat(300))).toBeGreaterThan(mustacheRiderHoldMs('ab'.repeat(300)));
+    for (const message of ['x'.repeat(2000), 'x\n'.repeat(1000)]) {
+      expect(alertPlaybackSchema.safeParse(resolveAlertPlayback({ ...defaults.overlayAppearance, theme: 'mustacherider' }, 2, message)).success).toBe(true);
+    }
+  });
+});
 
 describe('MustacheRider funding scale', () => {
   it('matches the supplied $25K reference and uses the exact funding ratio', () => {

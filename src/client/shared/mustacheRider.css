@@ -7,27 +7,28 @@
 .receipt-message-window::-webkit-scrollbar { display: none; }
 .receipt-message-window.is-playing { overflow: hidden; }
 .receipt-paper { box-sizing: border-box; width: 640px; padding: 32px 48px; color: #292823; background: repeating-linear-gradient(0deg, #00000003 0 1px, transparent 1px 4px), #f8f5eb; font: 400 26px/1.45 "Fira Code", "Courier New", monospace; text-align: center; overflow-wrap: anywhere; clip-path: polygon(0 6px, 2% 0, 4% 6px, 6% 0, 8% 6px, 10% 0, 12% 6px, 14% 0, 16% 6px, 18% 0, 20% 6px, 22% 0, 24% 6px, 26% 0, 28% 6px, 30% 0, 32% 6px, 34% 0, 36% 6px, 38% 0, 40% 6px, 42% 0, 44% 6px, 46% 0, 48% 6px, 50% 0, 52% 6px, 54% 0, 56% 6px, 58% 0, 60% 6px, 62% 0, 64% 6px, 66% 0, 68% 6px, 70% 0, 72% 6px, 74% 0, 76% 6px, 78% 0, 80% 6px, 82% 0, 84% 6px, 86% 0, 88% 6px, 90% 0, 92% 6px, 94% 0, 96% 6px, 98% 0, 100% 6px, 100% calc(100% - 6px), 98% 100%, 96% calc(100% - 6px), 94% 100%, 92% calc(100% - 6px), 90% 100%, 88% calc(100% - 6px), 86% 100%, 84% calc(100% - 6px), 82% 100%, 80% calc(100% - 6px), 78% 100%, 76% calc(100% - 6px), 74% 100%, 72% calc(100% - 6px), 70% 100%, 68% calc(100% - 6px), 66% 100%, 64% calc(100% - 6px), 62% 100%, 60% calc(100% - 6px), 58% 100%, 56% calc(100% - 6px), 54% 100%, 52% calc(100% - 6px), 50% 100%, 48% calc(100% - 6px), 46% 100%, 44% calc(100% - 6px), 42% 100%, 40% calc(100% - 6px), 38% 100%, 36% calc(100% - 6px), 34% 100%, 32% calc(100% - 6px), 30% 100%, 28% calc(100% - 6px), 26% 100%, 24% calc(100% - 6px), 22% 100%, 20% calc(100% - 6px), 18% 100%, 16% calc(100% - 6px), 14% 100%, 12% calc(100% - 6px), 10% 100%, 8% calc(100% - 6px), 6% 100%, 4% calc(100% - 6px), 2% 100%, 0 calc(100% - 6px)); }
-.receipt-logo { width: 72px; height: 72px; box-sizing: border-box; margin: 0 auto 16px; border: 3px solid currentColor; border-radius: 50%; }
+.receipt-logo { display: block; width: 112px; height: 112px; object-fit: contain; margin: 0 auto 8px; }
 .receipt-rule { border-top: 2px dashed currentColor; margin: 18px 0; opacity: .65; }
 .receipt-donation { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 24px; text-align: left; }
-.receipt-name { min-width: 0; font-size: 30px; line-height: 1.4; }
-.receipt-amount { font-size: 32px; font-weight: 400; white-space: nowrap; }
+.receipt-name { min-width: 0; font-size: 30px; font-weight: 700; line-height: 1.4; }
+.receipt-amount { font-size: 32px; font-weight: 700; white-space: nowrap; }
 .receipt-message { font-size: 30px; line-height: 1.45; text-align: left; white-space: pre-wrap; }
 .receipt-test { font-size: 16px; letter-spacing: 1px; margin-top: 6px; }
 .receipt-thanks { font-size: 20px; }
 .receipt-barcode { display: block; width: 80%; height: 50px; margin: 20px auto 0; fill: currentColor; }
 
 .mustacherider-art.is-animated .mustacherider-hotdog { transform-box: view-box; transform-origin: 50% 100%; animation: hotdog-arrive var(--hotdog-in-duration) var(--ease-out) both; }
-.mustacherider-art.is-animated .mustacherider-mustard-draw { animation: mustard-draw var(--mustard-in-duration) linear var(--hotdog-in-duration) both; }
+.mustacherider-art.is-animated .mustacherider-fill-mask { animation: mustard-draw var(--mustard-in-duration) linear var(--hotdog-in-duration) backwards; }
 @keyframes hotdog-arrive {
   0% { transform: translateY(110%) rotate(0); }
   62% { transform: translateY(0) rotate(-.8deg); }
   80% { transform: translateY(1%) rotate(.5deg); }
   100% { transform: translateY(0) rotate(0); }
 }
-@keyframes mustard-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes mustard-draw { from { width: 0; } to { width: var(--mustard-fill-width); } }
 @keyframes hotdog-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .mustacherider-art.is-animated .mustacherider-hotdog { animation: hotdog-fade 200ms ease both; }
+  .mustacherider-art.is-animated .mustacherider-fill-mask { animation: none; }
   .mustacherider-art.is-animated .mustacherider-mustard-draw { animation: hotdog-fade 200ms ease 200ms both; }
 }

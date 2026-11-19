@@ -35,6 +35,6 @@ function LiveGraphic() {
   const connected = useCampaignConnected();
   const appearance = resolveOverlayAppearance(useReplicant('overlayAppearance'));
   const show = connected || (alert.donation?.test === true && !alert.entryId);
-  return <div className="alert-stage">{show && <><AlertGraphic alert={alert} {...appearance} animation={appearance.alertAnimation} {...alert.playback} /><AlertSound alert={alert}/></>}</div>;
+  return <div className="alert-stage">{show && <><AlertGraphic alert={alert} {...appearance} animation={appearance.alertAnimation} {...alert.playback} /><AlertSound alert={alert} theme={alert.playback?.theme ?? appearance.theme}/></>}</div>;
 }
 createRoot(document.getElementById('root')!).render(testMode ? <TestGraphic /> : <LiveGraphic />);

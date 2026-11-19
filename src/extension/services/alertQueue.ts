@@ -11,7 +11,7 @@ export class AlertQueue {
   constructor(private readonly publish: (value: DonationAlert) => void, private readonly duration: () => number,
     private readonly log: (message: string) => void = () => {},
     private readonly onStart: (entryId: string) => void = () => {},
-    private readonly getPlayback: () => AlertPlayback = () => defaultAlertPlayback) {}
+    private readonly getPlayback: (donation: Donation) => AlertPlayback = () => defaultAlertPlayback) {}
   private emit() { this.publish({ donation: this.current?.donation ?? null, visible: this.visible, queued: this.pending.length,
     entryId: this.current?.entryId ?? null, queuedEntryIds: this.pending.flatMap((item) => item.entryId ? [item.entryId] : []),
     ...(this.current ? { playback: { ...this.playback } } : {}) }); }
@@ -27,7 +27,7 @@ export class AlertQueue {
     this.current = this.pending.shift() ?? null;
     // Keep timer and graphic timings together for the whole alert. New settings
     // are picked up by the next alert, including items already waiting to play.
-    if (this.current) this.playback = { ...this.getPlayback() };
+    if (this.current) this.playback = { ...this.getPlayback(this.current.donation) };
     this.visible = this.current !== null;
     this.emit();
     if (this.current?.entryId) this.onStart(this.current.entryId);

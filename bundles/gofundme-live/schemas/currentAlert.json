@@ -109,7 +109,7 @@
         "holdMs": {
           "type": "integer",
           "minimum": 2000,
-          "maximum": 30000
+          "maximum": 4002000
         }
       },
       "required": [

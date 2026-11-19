@@ -40,8 +40,8 @@ export class CampaignService {
     this.history.capture(store.get('recentDonations'), savedKey, store.get('campaign').title);
     this.history.capture(store.get('mockState').donations, 'mock:demo', store.get('mockState').campaign.title);
     this.alerts = new AlertQueue((value) => store.set('currentAlert', value), () => store.get('settings').alertDurationSeconds,
-      log, (entryId) => this.history.markSent(entryId), () => {
-        return resolveAlertPlayback(store.get('overlayAppearance'), store.get('settings').alertDurationSeconds);
+      log, (entryId) => this.history.markSent(entryId), (donation) => {
+        return resolveAlertPlayback(store.get('overlayAppearance'), store.get('settings').alertDurationSeconds, donation.message);
       });
   }
   async connect(settings: SettingsState) {

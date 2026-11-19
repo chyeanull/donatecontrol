@@ -98,8 +98,8 @@ describe('animation time around the fully-visible alert duration', () => {
     const service = new CampaignService(store, () => {}, () => ({}));
     service.testAlert(); service.testAlert();
     const first = state.currentAlert.donation!.id;
-    expect(state.currentAlert.playback).toMatchObject({ theme: 'mustacherider', animationInMs: 3600, holdMs: 10000, animationOutMs: 1400 });
-    vi.advanceTimersByTime(13599);
+    expect(state.currentAlert.playback).toMatchObject({ theme: 'mustacherider', animationInMs: 5100, holdMs: 10000, animationOutMs: 1400 });
+    vi.advanceTimersByTime(15099);
     expect(state.currentAlert.visible).toBe(true);
     vi.advanceTimersByTime(1); expect(state.currentAlert.visible).toBe(false);
     vi.advanceTimersByTime(1399); expect(state.currentAlert.donation!.id).toBe(first);
@@ -109,11 +109,38 @@ describe('animation time around the fully-visible alert duration', () => {
     state.overlayAppearance = { ...state.overlayAppearance, theme: 'classic', animationInMs: 500, animationOutMs: 400 };
     service.testAlert();
     expect(state.currentAlert.playback?.theme).toBe('mustacherider');
-    vi.advanceTimersByTime(15000);
+    vi.advanceTimersByTime(16500);
     expect(state.currentAlert.playback).toMatchObject({ theme: 'classic', animationInMs: 500, holdMs: 2000, animationOutMs: 400 });
     state.overlayAppearance = { ...state.overlayAppearance, theme: 'mustacherider' };
     expect(state.currentAlert.playback?.theme).toBe('classic');
     vi.advanceTimersByTime(2900); expect(state.currentAlert.donation).toBeNull();
+    service.alerts.stop();
+  });
+
+  it('keeps a long receipt visible for its reading time and resolves queued edits when they start', () => {
+    vi.useFakeTimers();
+    const state = structuredClone(defaults);
+    const store: StateStore = {
+      get: <K extends keyof Replicants>(key: K) => structuredClone(state[key]),
+      set: <K extends keyof Replicants>(key: K, value: Replicants[K]) => { schemas[key].parse(value); state[key] = structuredClone(value); },
+    };
+    state.overlayAppearance.theme = 'mustacherider';
+    const service = new CampaignService(store, () => {}, () => ({}));
+    service.alerts.enqueue({ ...donor('long'), message: 'Thank you for making a difference! '.repeat(30) });
+    service.alerts.enqueue({ ...donor('edited'), message: 'Short message' }, 'edited-entry');
+    service.alerts.updatePending('edited-entry', { donorName: 'Updated donor', message: 'A full line of thanks.\n'.repeat(35) });
+    const hold = state.currentAlert.playback!.holdMs!;
+    expect(hold).toBeGreaterThan(30000);
+    service.saveSettings({ alertDurationSeconds: 2, pollingIntervalSeconds: 15 });
+    expect(state.currentAlert.playback!.holdMs).toBe(hold);
+    vi.advanceTimersByTime(5100 + hold - 1);
+    expect(state.currentAlert.visible).toBe(true);
+    expect(state.currentAlert.donation!.id).toBe('long');
+    vi.advanceTimersByTime(1);
+    expect(state.currentAlert.visible).toBe(false);
+    vi.advanceTimersByTime(1400);
+    expect(state.currentAlert.donation!.id).toBe('edited');
+    expect(state.currentAlert.playback!.holdMs).toBeGreaterThan(30000);
     service.alerts.stop();
   });
 });

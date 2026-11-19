@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import type { DonationAlert } from '../../shared/models';
+import type { DonationAlert, OverlayTheme } from '../../shared/models';
 import { BUNDLE } from '../../shared/models';
 import { authenticatedUrl, useReplicant } from '../shared/nodecg';
+import { MustacheRiderSound } from './MustacheRiderSound';
 
-export function AlertSound({ alert }: { alert: DonationAlert }) {
+export function AlertSound({ alert, theme }: { alert: DonationAlert; theme: OverlayTheme }) {
+  return theme === 'mustacherider' ? <MustacheRiderSound alert={alert}/> : <UploadedAlertSound alert={alert}/>;
+}
+
+function UploadedAlertSound({ alert }: { alert: DonationAlert }) {
   const sound = useReplicant('alertSound');
   const config = useRef(sound); config.current = sound;
   const audio = useRef<HTMLAudioElement | null>(null);

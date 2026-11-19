@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { overlayFonts } from './fonts';
+import { MAX_RECEIPT_HOLD_MS } from './mustacheRider';
 
 export const BUNDLE = 'gofundme-live';
 export const DEFAULT_ANIMATION_IN_MS = 500;
@@ -13,7 +14,7 @@ export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
 // Optional for older clients; new playback captures its theme and hold duration
 // so appearance edits cannot switch canvas/motion halfway through an alert.
 export const alertPlaybackSchema = z.object({ animation: overlayAnimationSchema, animationInMs: animationMsSchema, animationOutMs: animationMsSchema,
-  theme: overlayThemeSchema.optional(), holdMs: z.number().int().min(2000).max(30000).optional() });
+  theme: overlayThemeSchema.optional(), holdMs: z.number().int().min(2000).max(MAX_RECEIPT_HOLD_MS).optional() });
 export type AlertPlayback = z.infer<typeof alertPlaybackSchema>;
 export const defaultAlertPlayback: AlertPlayback = { animation: 'draw-left', animationInMs: DEFAULT_ANIMATION_IN_MS, animationOutMs: DEFAULT_ANIMATION_OUT_MS };
 const money = z.number().finite().min(0).max(1e12);

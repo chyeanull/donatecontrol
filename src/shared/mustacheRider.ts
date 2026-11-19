@@ -1,9 +1,30 @@
 // Shared by server playback, live graphics, and the dashboard preview.
+// Play the opening 1.5 seconds of cha-ching before feeding paper.
+const cashLeadInMs = 1500;
+const printMs = 2400, tearMs = 300, settleMs = 900;
+const receiptInMs = printMs + tearMs + settleMs;
 export const mustacheRiderMotion = {
   hotdogInMs: 900, mustardInMs: 1800,
-  printMs: 2400, tearMs: 300, settleMs: 900,
-  alertInMs: 3600, holdMs: 10000, alertOutMs: 1400,
+  cashLeadInMs, printMs, tearMs, settleMs, receiptInMs,
+  alertInMs: cashLeadInMs + receiptInMs, holdMs: 10000, alertOutMs: 1400,
+  messagePauseMs: 1000, messageLineMs: 1600,
 } as const;
+
+// Keep the schema compatible with the older two-second reading budgets.
+// Normal short receipts still hold for 10 seconds.
+export const MAX_RECEIPT_HOLD_MS = 2000 * 2000 + 2000;
+export function mustacheRiderHoldMs(message?: string) {
+  const text = message?.trim();
+  if (!text) return mustacheRiderMotion.holdMs;
+  // Budget conservatively for wrapping in the fixed 544px message column.
+  // Count explicit line breaks, tabs and wide characters as well as plain text.
+  const lines = text.split(/\r\n?|\n/).reduce((total, line) => {
+    const cells = [...line].reduce((width, char) => width + (char === '\t' ? 8 : char.codePointAt(0)! >= 0x2e80 ? 2 : 1), 0);
+    return total + Math.max(1, Math.ceil(cells / 25));
+  }, 0);
+  return lines <= 10 ? mustacheRiderMotion.holdMs
+    : Math.min(MAX_RECEIPT_HOLD_MS, Math.max(20000, lines * mustacheRiderMotion.messageLineMs + 2 * mustacheRiderMotion.messagePauseMs));
+}
 
 /** Six bun labels span the effective campaign goal (including local overrides). */
 export function mustacheRiderScale(raised: number, goal: number, currency: string) {

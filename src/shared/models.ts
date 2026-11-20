@@ -14,7 +14,8 @@ export type OverlayTheme = z.infer<typeof overlayThemeSchema>;
 // Optional for older clients; new playback captures its theme and hold duration
 // so appearance edits cannot switch canvas/motion halfway through an alert.
 export const alertPlaybackSchema = z.object({ animation: overlayAnimationSchema, animationInMs: animationMsSchema, animationOutMs: animationMsSchema,
-  theme: overlayThemeSchema.optional(), holdMs: z.number().int().min(2000).max(MAX_RECEIPT_HOLD_MS).optional() });
+  theme: overlayThemeSchema.optional(), holdMs: z.number().int().min(2000).max(MAX_RECEIPT_HOLD_MS).optional(),
+  receiptMode: z.enum(['print', 'fade']).optional() });
 export type AlertPlayback = z.infer<typeof alertPlaybackSchema>;
 export const defaultAlertPlayback: AlertPlayback = { animation: 'draw-left', animationInMs: DEFAULT_ANIMATION_IN_MS, animationOutMs: DEFAULT_ANIMATION_OUT_MS };
 const money = z.number().finite().min(0).max(1e12);
@@ -124,6 +125,7 @@ export const schemas = {
   givebutterCredentialStatus: credentialStatusSchema,
   alertSound: alertSoundSchema,
   overlayAppearance: overlayAppearanceSchema,
+  mustacheRiderControls: z.object({ thermometerVisible: z.boolean() }),
 };
 export type CampaignState = z.infer<typeof campaignSchema>;
 export type SettingsState = z.infer<typeof settingsSchema>;
@@ -145,6 +147,9 @@ export type Commands = {
   testAlert: undefined; clearQueue: undefined; dismissAlert: undefined;
   resendDonation: { donationId: string };
   sendDonation: { entryId: string };
+  sendDonationWithFade: { entryId: string };
+  fadeOutReceipt: { entryId: string; playbackId: string };
+  setMustacheRiderThermometer: { visible: boolean };
   editDonation: z.infer<typeof editDonationSchema>;
   resetDonation: { entryId: string };
   setManualAlertControl: { manual: boolean };
@@ -176,4 +181,5 @@ export const defaults: Replicants = {
   givebutterCredentialStatus: { configured: false, source: 'none', saved: false, storageError: false },
   alertSound: { file: null, name: '', enabled: false, volume: 0.7 },
   overlayAppearance: { theme: 'classic', ...defaultAlertPlayback, classicColors: defaultClassicColors },
+  mustacheRiderControls: { thermometerVisible: true },
 };

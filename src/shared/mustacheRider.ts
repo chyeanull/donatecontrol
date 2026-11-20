@@ -1,3 +1,5 @@
+import type { DonationAlert } from './models';
+
 // Shared by server playback, live graphics, and the dashboard preview.
 // Play the opening 1.5 seconds of cha-ching before feeding paper.
 const cashLeadInMs = 1500;
@@ -8,7 +10,13 @@ export const mustacheRiderMotion = {
   cashLeadInMs, printMs, tearMs, settleMs, receiptInMs,
   alertInMs: cashLeadInMs + receiptInMs, holdMs: 10000, alertOutMs: 1400,
   messagePauseMs: 1000, messageLineMs: 1600,
+  fadeInMs: 300, fadeOutMs: 300, hotdogOutMs: 900,
 } as const;
+
+/** Includes the exit, so other sends stay locked until the paper is gone. */
+export function isMustacheRiderFade(alert: DonationAlert) {
+  return Boolean(alert.donation && alert.playback?.theme === 'mustacherider' && alert.playback.receiptMode === 'fade');
+}
 
 // Keep the schema compatible with the older two-second reading budgets.
 // Normal short receipts still hold for 10 seconds.

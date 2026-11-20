@@ -14,10 +14,10 @@ export function MustacheRiderSound({ alert }: { alert: DonationAlert }) {
   }, []);
   useEffect(() => { player.current?.setVolume(volume); }, [volume]);
   useEffect(() => {
-    if (alert.visible && alert.donation?.id) player.current?.play();
+    if (alert.visible && alert.donation?.id && alert.playback?.receiptMode !== 'fade') player.current?.play();
     return () => player.current?.stop();
-  }, [alert.donation?.id, alert.visible]);
-  return blocked && alert.visible && volume > 0
+  }, [alert.donation?.id, alert.visible, alert.playback?.receiptMode]);
+  return blocked && alert.visible && alert.playback?.receiptMode !== 'fade' && volume > 0
     ? <button className="enable-alert-sound" onClick={() => player.current?.unlock()}>Enable sound</button>
     : null;
 }

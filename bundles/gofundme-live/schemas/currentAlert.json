@@ -110,6 +110,13 @@
           "type": "integer",
           "minimum": 2000,
           "maximum": 4002000
+        },
+        "receiptMode": {
+          "type": "string",
+          "enum": [
+            "print",
+            "fade"
+          ]
         }
       },
       "required": [

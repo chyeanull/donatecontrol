@@ -1,4 +1,6 @@
 import { defaultAlertPlayback, type AlertPlayback, type Donation, type DonationAlert } from '../../shared/models';
+import { mustacheRiderMotion } from '../../shared/mustacheRider';
+import { ProviderError } from '../providers/FundraisingProvider';
 
 interface QueueItem { donation: Donation; entryId?: string }
 export class AlertQueue {
@@ -12,6 +14,24 @@ export class AlertQueue {
     private readonly log: (message: string) => void = () => {},
     private readonly onStart: (entryId: string) => void = () => {},
     private readonly getPlayback: (donation: Donation) => AlertPlayback = () => defaultAlertPlayback) {}
+  get fadeLocked() { return Boolean(this.current && this.playback.theme === 'mustacherider' && this.playback.receiptMode === 'fade'); }
+  sendWithFade(donation: Donation, entryId: string) {
+    if (this.current || this.pending.length) throw new ProviderError('Wait for the current alert to finish before sending with fade.');
+    const playback = this.getPlayback(donation);
+    if (playback.theme !== 'mustacherider') throw new ProviderError('Send with fade is available only for MustacheRider.');
+    this.current = { donation, entryId };
+    this.playback = { ...playback, receiptMode: 'fade', animationInMs: mustacheRiderMotion.fadeInMs, animationOutMs: mustacheRiderMotion.fadeOutMs };
+    this.visible = true;
+    this.emit();
+    this.onStart(entryId);
+    // No timer: only the producer's fade-out releases the next queued alert.
+  }
+  fadeOut(entryId: string, playbackId: string) {
+    if (!this.fadeLocked || this.current?.entryId !== entryId || this.current.donation.id !== playbackId) {
+      throw new ProviderError('This receipt is no longer on screen. Refresh the donation list.');
+    }
+    this.dismiss();
+  }
   private emit() { this.publish({ donation: this.current?.donation ?? null, visible: this.visible, queued: this.pending.length,
     entryId: this.current?.entryId ?? null, queuedEntryIds: this.pending.flatMap((item) => item.entryId ? [item.entryId] : []),
     ...(this.current ? { playback: { ...this.playback } } : {}) }); }

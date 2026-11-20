@@ -6,7 +6,8 @@ import './overlay.css';
 function Graphic() {
   const campaign = useReplicant('campaign');
   const connected = useCampaignConnected();
+  const { thermometerVisible } = useReplicant('mustacheRiderControls');
   const appearance = resolveOverlayAppearance(useReplicant('overlayAppearance'));
-  return <div className="thermometer-stage">{connected && <Thermometer campaign={campaign} {...appearance} animation={appearance.thermometerAnimation} />}</div>;
+  return <div className="thermometer-stage">{connected && <Thermometer campaign={campaign} {...appearance} animation={appearance.thermometerAnimation} visible={appearance.theme !== 'mustacherider' || thermometerVisible} />}</div>;
 }
 createRoot(document.getElementById('root')!).render(<Graphic />);

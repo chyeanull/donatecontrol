@@ -12,7 +12,7 @@ export function Heart({ className = '' }: { className?: string }) {
   return <DonationIcon className={className} name="heart"/>;
 }
 type AppearanceProps = { theme?: OverlayTheme; animation?: OverlayAnimation; classicColors?: ClassicColors; customTheme?: CustomTheme; animationInMs?: number; animationOutMs?: number };
-export function Thermometer({ campaign, theme = 'classic', animation = 'draw-left', classicColors, customTheme, animationInMs, animateEntrance = true }: Omit<AppearanceProps, 'animationOutMs'> & { campaign: CampaignState; animateEntrance?: boolean }) {
+export function Thermometer({ campaign, theme = 'classic', animation = 'draw-left', classicColors, customTheme, animationInMs, animateEntrance = true, visible = true }: Omit<AppearanceProps, 'animationOutMs'> & { campaign: CampaignState; animateEntrance?: boolean; visible?: boolean }) {
   const raised = useCountUp(campaign.raised);
   // This persistent graphic enters only on mount. Donation totals and appearance
   // updates must never hide it or restart its entrance.
@@ -21,7 +21,7 @@ export function Thermometer({ campaign, theme = 'classic', animation = 'draw-lef
   const icon = overlayIcon(customTheme);
   useGoogleFont(overlayGoogleFont(theme, customTheme));
   return <section className={`thermometer ${theme === 'mustacherider' ? '' : 'overlay-motion'} ${entered ? 'is-visible' : ''}`} data-theme={theme} data-animation={animation} style={{ ...customThemeStyle(theme, classicColors, customTheme), ...overlayMotionStyle(animationInMs, 0) }} aria-label={`${campaign.title}: ${formatCurrency(campaign.raised, campaign.currency)} raised${campaign.goal > 0 ? ` of ${formatCurrency(campaign.goal, campaign.currency)} goal, ${campaign.percent}%` : ', goal not set'}`}>
-    {theme === 'mustacherider' ? <MustacheRiderThermometer campaign={campaign} animate={animateEntrance}/> : <>
+    {theme === 'mustacherider' ? <MustacheRiderThermometer campaign={campaign} animate={animateEntrance} visible={visible}/> : <>
     {theme === 'cs2' && <CounterStrikeChicken/>}
     <div className="thermo-heading">{icon && <span className="graphic-mark"><DonationIcon name={icon}/></span>}<span className="thermo-title">{campaign.title}</span><span className="thermo-tag">TOGETHER, WE CAN.</span></div>
     <div className="thermo-amounts"><div><strong>{formatCurrency(raised, campaign.currency, false)}</strong><span> raised</span></div><div className="thermo-goal">{campaign.goal > 0 ? <><strong>{formatCurrency(campaign.goal, campaign.currency, Boolean(campaign.goalOverridden) && !Number.isInteger(campaign.goal))}</strong><span> goal</span></> : <span>Every donation makes a difference</span>}</div></div>

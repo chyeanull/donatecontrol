@@ -165,6 +165,7 @@ export class CampaignService {
     this.log('Broadcast settings saved');
   }
   testAlert() {
+    this.ensureSendUnlocked();
     this.alerts.enqueue({ id: `test-${randomUUID()}`, donorName: 'Alex Morgan', amount: 25,
       message: 'Proud to support this community. Keep going!',
       currency: this.store.get('connectionStatus').state === 'connected' ? this.store.get('campaign').currency : 'USD', timestamp: new Date().toISOString(), anonymous: false, test: true });
@@ -178,10 +179,33 @@ export class CampaignService {
     this.sendDonation({ entryId: entries.get(donation.id)!.id });
   }
   sendDonation({ entryId }: Commands['sendDonation']) {
+    this.ensureSendUnlocked();
     const entry = this.history.get(entryId);
     // Each intentional send has its own playback ID but retains its history entry.
     this.alerts.enqueue({ ...this.history.content(entry), id: `replay-${randomUUID()}` }, entry.id);
     this.log(`Donation alert queued: ${entry.donorName} · ${formatCurrency(entry.donation.amount, entry.donation.currency)} · campaign total unchanged`);
+  }
+  ensureSendUnlocked() {
+    if (this.alerts.fadeLocked) throw new ProviderError('Fade out the current receipt before sending another alert.');
+  }
+  sendDonationWithFade({ entryId }: Commands['sendDonationWithFade']) {
+    this.ensureSendUnlocked();
+    if (this.store.get('overlayAppearance').theme !== 'mustacherider') throw new ProviderError('Send with fade is available only for MustacheRider.');
+    const entry = this.history.get(entryId);
+    if (this.store.get('connectionStatus').state !== 'connected' || entry.campaignKey !== this.store.get('donationLedger').campaignKey) {
+      throw new ProviderError('Connect this donation’s campaign before sending it to screen.');
+    }
+    this.alerts.sendWithFade({ ...this.history.content(entry), id: `fade-${randomUUID()}` }, entry.id);
+    this.log('Receipt faded in · waiting for the producer to fade out');
+  }
+  fadeOutReceipt({ entryId, playbackId }: Commands['fadeOutReceipt']) {
+    this.alerts.fadeOut(entryId, playbackId);
+    this.log('Receipt fading out');
+  }
+  setMustacheRiderThermometer({ visible }: Commands['setMustacheRiderThermometer']) {
+    if (this.store.get('overlayAppearance').theme !== 'mustacherider') throw new ProviderError('Thermometer visibility controls are available only for MustacheRider.');
+    this.store.set('mustacheRiderControls', { thermometerVisible: visible });
+    this.log(visible ? 'MustacheRider thermometer showing' : 'MustacheRider thermometer hiding');
   }
   editDonation(value: Commands['editDonation']) {
     const entry = this.history.edit(value);
@@ -208,6 +232,7 @@ export class CampaignService {
     this.ensureMock(); await this.refresh(); this.mock.edit(value); await this.refresh();
   }
   async addMockDonation(value: Commands['addMockDonation']) {
+    this.ensureSendUnlocked();
     this.ensureMock(); await this.refresh(); this.mock.donate(value.donorName, value.amount, value.message); await this.refresh();
   }
   async resetMock() {

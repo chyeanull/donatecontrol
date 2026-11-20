@@ -21,6 +21,7 @@ export function MustacheRiderReceipt({ alert, animate = true }: { alert: Donatio
   const reduce = useReducedMotion();
   const [layout, setLayout] = useState({ canvasScale: 1, width: canvas.paperWidth, height: 640, messageOverflow: 0, messageHeight: 0, ready: false });
   const id = alert.donation?.id;
+  const fade = alert.playback?.receiptMode === 'fade';
   const holdMs = alert.playback?.holdMs ?? mustacheRiderHoldMs(alert.donation?.message);
 
   useLayoutEffect(() => {
@@ -44,7 +45,25 @@ export function MustacheRiderReceipt({ alert, animate = true }: { alert: Donatio
   }, [id]);
 
   useLayoutEffect(() => () => active.current?.cancel(), []);
+  // A held fade does not depend on the paper's measured dimensions. Loading
+  // fonts or resizing the preview must not restart it or interrupt its exit.
   useLayoutEffect(() => {
+    if (!fade || !layout.ready) return;
+    const element = motion.current;
+    if (!element || !id) return;
+    const opacity = getComputedStyle(element).opacity;
+    const ease = getComputedStyle(element).getPropertyValue('--ease-out').trim();
+    active.current?.cancel();
+    element.style.transform = 'none';
+    element.style.opacity = animate ? '0' : alert.visible ? '1' : '0';
+    active.current = animate ? element.animate([
+      { opacity: alert.visible ? 0 : opacity, transform: 'none' },
+      { opacity: alert.visible ? 1 : 0, transform: 'none' },
+    ], { duration: alert.visible ? timing.fadeInMs : timing.fadeOutMs, easing: ease, fill: 'both' }) : null;
+  }, [id, alert.visible, fade, animate, layout.ready]);
+
+  useLayoutEffect(() => {
+    if (fade) return;
     const element = motion.current;
     if (!element || !id) { active.current?.cancel(); active.current = null; return; }
     if (!layout.ready) return;
@@ -94,7 +113,7 @@ export function MustacheRiderReceipt({ alert, animate = true }: { alert: Donatio
         { offset: 1, transform: `translate(-18px, ${layout.height + 120}px) rotate(-10deg)`, opacity: 0 },
       ], { duration: timing.alertOutMs, fill: 'both' });
     }
-  }, [id, alert.visible, animate, reduce, layout.ready, layout.width, layout.height]);
+  }, [id, alert.visible, fade, animate, reduce, layout.ready, layout.width, layout.height]);
 
   useLayoutEffect(() => {
     const element = message.current;
@@ -111,7 +130,7 @@ export function MustacheRiderReceipt({ alert, animate = true }: { alert: Donatio
       { transform: 'translateY(0)' },
       { transform: `translateY(-${layout.messageOverflow}px)` },
     ], {
-      delay: timing.alertInMs + timing.messagePauseMs,
+      delay: (fade ? timing.fadeInMs : timing.alertInMs) + timing.messagePauseMs,
       // Give the final reduced-motion page an equal reading interval too.
       duration: reduce ? scrollMs * pages / (pages + 1) : scrollMs,
       easing: reduce ? `steps(${pages}, end)` : 'linear', fill: 'both',
@@ -121,7 +140,7 @@ export function MustacheRiderReceipt({ alert, animate = true }: { alert: Donatio
       element.style.transform = getComputedStyle(element).transform;
       animation.cancel();
     };
-  }, [id, alert.visible, animate, reduce, layout.ready, layout.messageOverflow, layout.messageHeight, holdMs]);
+  }, [id, alert.visible, fade, animate, reduce, layout.ready, layout.messageOverflow, layout.messageHeight, holdMs]);
 
   if (!alert.donation) return null;
   const donation = alert.donation;

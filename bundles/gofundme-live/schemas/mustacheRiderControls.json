@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "thermometerVisible": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "thermometerVisible"
+  ],
+  "additionalProperties": false,
+  "default": {
+    "thermometerVisible": true
+  }
+}

@@ -96,3 +96,9 @@ The subsequent cha-ching lead-in change passed TypeScript, 14 focused audio/queu
 The cha-ching lead-in was subsequently shortened to 1500ms, with the chime stopped when printing begins. TypeScript, the 14 focused audio/queue tests, and the production build passed again; the queue retains the full 10-second hold within the 16.5-second cycle.
 
 Long-message reading time now extends the server queue and graphic together. TypeScript, 29 focused timing/audio/logic checks, and the production build passed. An isolated browser check verified the one-second pause after the entrance, slower linear scrolling, the final lines remaining visible, equal reading time for reduced-motion pages, cancellation, and a contained mobile preview. No live test alerts were sent.
+
+### MustacheRider producer controls
+
+The donation list offers **Send with fade / Fade out** only when MustacheRider is applied. This silent variant uses a 300 ms opacity fade, no print sequence, and no automatic dismissal. The queue captures `receiptMode: "fade"`; other sends and applying a different theme remain locked until the 300 ms exit ends. Automatic arrivals update totals/history immediately and wait behind the held receipt. Long text scrolls once using its captured reading budget, then remains visible. Ordinary receipt playback retains its sounds, timing, and print/tear/turn/float sequence.
+
+**Hide thermometer / Show thermometer** controls the live hot dog independently. Visibility is saved in `mustacheRiderControls`; hidden state never affects other themes or dashboard previews. The hot dog slides down in 900 ms at full opacity, without fading, and shows with the original rise/jiggle/mustard reveal. WAAPI preserves the current transform when interrupted; funding updates do not restart the entrance. Reduced motion uses an opacity fade.

@@ -1,4 +1,7 @@
 .donation-mode-layout { --manual-control-color: var(--accent); display: flex; width: fit-content; max-width: 100%; gap: 0; align-items: stretch; margin-bottom: 32px; }
+.donation-top-controls { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+.donation-top-controls .donation-mode-layout { margin-bottom: 0; }
+.thermometer-visibility { margin-left: auto; flex-shrink: 0; }
 .donation-mode-layout[data-manual="true"] { --manual-control-color: #15803d; }
 .card.donation-mode { display: flex; align-items: center; flex: 0 0 auto; position: relative; z-index: 1; margin: 0 -1px 0 0; padding: 16px; background: var(--manual-control-color); border: 1px solid var(--manual-control-color); border-radius: 4px 0 0 4px; color: #fff; }
 .donation-mode .toggle-row { margin: 0; }
@@ -57,6 +60,7 @@
 .donation-sent { color: #76e5a0; }
 .donation-unsent { color: #e5e5e5; }
 .donation-entry-actions { display: flex; flex-direction: column; gap: 4px; }
+.donation-send-actions { display: flex; flex-direction: column; gap: 4px; }
 .donation-entry-actions button { min-height: 28px; padding: 4px 8px; font-size: 11px; gap: 4px; }
 .donation-entry-actions .icon { width: 13px; height: 13px; }
 .donation-edit-actions { display: flex; gap: 4px; }

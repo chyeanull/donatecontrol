@@ -5,7 +5,11 @@ import { authenticatedUrl, useReplicant } from '../shared/nodecg';
 import { MustacheRiderSound } from './MustacheRiderSound';
 
 export function AlertSound({ alert, theme }: { alert: DonationAlert; theme: OverlayTheme }) {
-  return theme === 'mustacherider' ? <MustacheRiderSound alert={alert}/> : <UploadedAlertSound alert={alert}/>;
+  if (theme === 'mustacherider') {
+    // Fade receipts are silent: unmounting also stops any previous print cues.
+    return alert.playback?.receiptMode === 'fade' ? null : <MustacheRiderSound alert={alert}/>;
+  }
+  return <UploadedAlertSound alert={alert}/>;
 }
 
 function UploadedAlertSound({ alert }: { alert: DonationAlert }) {

@@ -17,18 +17,11 @@
 .receipt-thanks { font-size: 20px; }
 .receipt-barcode { display: block; width: 80%; height: 50px; margin: 20px auto 0; fill: currentColor; }
 
-.mustacherider-art.is-animated .mustacherider-hotdog { transform-box: view-box; transform-origin: 50% 100%; animation: hotdog-arrive var(--hotdog-in-duration) var(--ease-out) both; }
+.mustacherider-hotdog { transform-box: view-box; transform-origin: 50% 100%; }
 .mustacherider-art.is-animated .mustacherider-fill-mask { animation: mustard-draw var(--mustard-in-duration) linear var(--hotdog-in-duration) backwards; }
-@keyframes hotdog-arrive {
-  0% { transform: translateY(110%) rotate(0); }
-  62% { transform: translateY(0) rotate(-.8deg); }
-  80% { transform: translateY(1%) rotate(.5deg); }
-  100% { transform: translateY(0) rotate(0); }
-}
 @keyframes mustard-draw { from { width: 0; } to { width: var(--mustard-fill-width); } }
 @keyframes hotdog-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .mustacherider-art.is-animated .mustacherider-hotdog { animation: hotdog-fade 200ms ease both; }
   .mustacherider-art.is-animated .mustacherider-fill-mask { animation: none; }
   .mustacherider-art.is-animated .mustacherider-mustard-draw { animation: hotdog-fade 200ms ease 200ms both; }
 }

@@ -10,6 +10,9 @@ export const notify = {
 };
 
 const confirmations: Record<keyof Commands, string> = {
+  sendDonationWithFade: 'Receipt faded in. Click Fade out when you are ready.',
+  fadeOutReceipt: 'Receipt fading out.',
+  setMustacheRiderThermometer: 'Thermometer visibility updated.',
   setMovemberGoal: 'Fundraising goal updated.',
   connect: 'Campaign connected.', refresh: 'Campaign refreshed.', disconnect: 'Campaign disconnected.',
   saveSettings: 'Broadcast settings saved.', testAlert: 'Test alert queued.', clearQueue: 'Playback queue cleared.',

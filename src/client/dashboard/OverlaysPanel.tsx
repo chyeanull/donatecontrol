@@ -139,12 +139,12 @@ export function OverlaysPanel() {
         <p className="fine-print">{customMotion ? 'MustacheRider uses its own animations and timing. Your other animation settings are kept for the other themes.' : 'Use Test below to preview the thermometer entering and staying visible, alongside a full alert cycle.'}</p>
       </section>
     </div>
-    <aside className="theme-apply" aria-label="Save overlay changes"><p>Preview changes here, then apply them to both live overlays.</p><button className="primary" disabled={disabled || testing || !changed || (!customMotion && (!inValid || !outValid)) || (selected === 'classic' && (!colorsValid || !borderValid))} onClick={() => void run('saveOverlayAppearance', { theme: selected, alertAnimation, thermometerAnimation, classicColors, customTheme, animationInMs, animationOutMs }, `${theme.name} appearance saved to both overlays.`)}>{busy === 'saveOverlayAppearance' ? 'Saving…' : 'Save Changes'}</button></aside>
+    <aside className="theme-apply" aria-label="Save overlay changes"><p>Preview changes here, then apply them to both live overlays.</p><button className="primary" disabled={disabled || (controls.sendLocked && !customMotion) || testing || !changed || (!customMotion && (!inValid || !outValid)) || (selected === 'classic' && (!colorsValid || !borderValid))} onClick={() => void run('saveOverlayAppearance', { theme: selected, alertAnimation, thermometerAnimation, classicColors, customTheme, animationInMs, animationOutMs }, `${theme.name} appearance saved to both overlays.`)}>{busy === 'saveOverlayAppearance' ? 'Saving…' : 'Save Changes'}</button></aside>
     </div>
     <section className="card headed-card overlays"><SectionTitle step="02" title="Preview & connect">
       <div className="button-row overlay-test-actions">
         <button className="secondary" disabled={!testing && !customMotion && (!inValid || !outValid)} onClick={testing ? stopAnimation : testAnimation}>{!testing && <Icon name="play"/>}{testing ? 'Stop preview' : 'Test below'}</button>
-        <button className="secondary" disabled={disabled} onClick={() => void run('testAlert', undefined, 'Test alert queued for the live overlay. Your fundraising total is unchanged.')}><Icon name="monitor"/>Test on live overlay</button>
+        <button className="secondary" disabled={disabled || controls.sendLocked} onClick={() => void run('testAlert', undefined, 'Test alert queued for the live overlay. Your fundraising total is unchanged.')}><Icon name="monitor"/>Test on live overlay</button>
       </div>
     </SectionTitle>
       <div className="overlay-grid">

@@ -28,6 +28,7 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
     credentialStatus: create('credentialStatus'),
     givebutterCredentialStatus: create('givebutterCredentialStatus'), alertSound: create('alertSound'),
     overlayAppearance: create('overlayAppearance'),
+    mustacheRiderControls: create('mustacheRiderControls'),
     donationHistory: create('donationHistory'), donationControl: create('donationControl'),
   };
   const store: StateStore = {
@@ -106,6 +107,9 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
   command('testAlert', noData, () => service.testAlert());
   command('resendDonation', z.object({ donationId: z.string().min(1).max(4096) }).strict(), (data) => service.resendDonation(data));
   command('sendDonation', z.object({ entryId: z.string().uuid() }).strict(), (data) => service.sendDonation(data));
+  command('sendDonationWithFade', z.object({ entryId: z.string().uuid() }).strict(), (data) => service.sendDonationWithFade(data));
+  command('fadeOutReceipt', z.object({ entryId: z.string().uuid(), playbackId: z.string().min(1).max(4096) }).strict(), (data) => service.fadeOutReceipt(data));
+  command('setMustacheRiderThermometer', z.object({ visible: z.boolean() }).strict(), (data) => service.setMustacheRiderThermometer(data));
   command('editDonation', editDonationSchema, (data) => service.editDonation(data),
     'Enter a donor name of 1–200 characters and a donation message of up to 2,000 characters.');
   command('resetDonation', z.object({ entryId: z.string().uuid() }).strict(), (data) => service.resetDonation(data));
@@ -114,6 +118,7 @@ export default function extension(nodecg: NodeCG.ServerAPI) {
     store.set('alertSound', { ...store.get('alertSound'), ...data }); log('Donation alert sound settings saved');
   });
   command('saveOverlayAppearance', overlayAppearanceSchema, (data) => {
+    if (data.theme !== 'mustacherider') service.ensureSendUnlocked();
     const appearance = resolveOverlayAppearance(data, store.get('overlayAppearance'));
     const { alertAnimation, thermometerAnimation } = appearance;
     store.set('overlayAppearance', appearance);

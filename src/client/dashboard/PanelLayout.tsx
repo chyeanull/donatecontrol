@@ -5,6 +5,7 @@ import { send, useCampaignConnected, useReplicant, useSocketConnected } from '..
 import { providerNames, type Commands } from '../../shared/models';
 import { dashboardPages, type DashboardPage } from '../../shared/dashboard';
 import { commandConfirmation, notify } from './notifications';
+import { isMustacheRiderFade } from '../../shared/mustacheRider';
 
 export function Icon({ name }: { name: 'copy' | 'external' | 'play' | 'refresh' | 'link' | 'activity' | 'monitor' }) {
   const paths = {
@@ -27,6 +28,7 @@ export function useControls() {
   const settings = useReplicant('settings');
   const online = useSocketConnected();
   const connected = useCampaignConnected();
+  const currentAlert = useReplicant('currentAlert');
   const [busy, setBusy] = useState<string | null>(null);
   const run = async <K extends keyof Commands>(name: K, data: Commands[K], success?: string) => {
     setBusy(name);
@@ -34,7 +36,7 @@ export function useControls() {
     catch (error: unknown) { notify.error(error instanceof Error ? error.message : 'The command could not be completed. Try again.'); return false; }
     finally { setBusy(null); }
   };
-  return { status, settings, online, connected, busy, setBusy, run, disabled: Boolean(busy) || !online };
+  return { status, settings, online, connected, busy, setBusy, run, currentAlert, sendLocked: isMustacheRiderFade(currentAlert), disabled: Boolean(busy) || !online };
 }
 export function PanelLayout({ page, controls, children }: { page: DashboardPage; controls: ReturnType<typeof useControls>; children: ReactNode }) {
   const { status, online, connected } = controls;

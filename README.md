@@ -41,3 +41,11 @@ npm start
 Open [localhost:9090/dashboard](http://localhost:9090/dashboard/), connect a campaign, and add the browser-source URLs from **Your overlays** to OBS. Provider credentials can be entered in the dashboard. Use **Mock / Demo** to try the app without an account.
 
 For development, use `npm run dev` instead of the build/start commands.
+
+**OR, delegate to your AI friend**
+
+Install **Codex CLI** or **Claude Code**, open a terminal in the downloaded or cloned project folder, and launch it. Then say:
+
+> Read the setup instructions and get this app running locally. Make it work with no mistakes.
+
+Let it handle setup and start the app. The “no mistakes” part is mostly for morale.

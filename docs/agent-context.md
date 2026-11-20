@@ -29,6 +29,14 @@ npx nodecg start
 
 NodeCG **2.8.0** is pinned as a dependency; `bundles/gofundme-live/` contains the bundle. This follows NodeCG's [documented dependency installation](https://www.nodecg.dev/docs/installing-new/), which NodeCG still labels experimental. The dependency setup and CLI are verified with this pinned version. No global CLI or separate NodeCG checkout is needed.
 
+**OR, delegate to your AI friend**
+
+Install **Codex CLI** or **Claude Code**, open a terminal in the downloaded or cloned project folder, and launch it. Then say:
+
+> Read the setup instructions and get this app running locally. Make it work with no mistakes.
+
+Let it handle setup and start the app. The “no mistakes” part is mostly for morale.
+
 ## Control panel tabs and themes
 
 The control panel follows the attached [ESportsArena design system](design.md): compact black surfaces, red and blue accents, bold Raleway headings, Inter body text, and JetBrains Mono for statistics, URLs, and timestamps. Dashboard headings and the wordmark load Raleway from Google Fonts. Dashboard body/monospace fonts and the existing Quest/BWF fonts are bundled locally. Custom loads its selected font from Google Fonts; Cyberkid loads Rajdhani, Grandsteal loads Oswald, Counter-Strike 2 loads Roboto Condensed, and MustacheRider loads Rubik Spray Paint from Google Fonts without bundling new fonts. Internet fonts use a sans-serif fallback while loading or offline.
